@@ -6,20 +6,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>530</width>
     <height>600</height>
    </rect>
   </property>
   <property name="font">
    <font>
-    <family>Verdana</family>
+    <family>verdana</family>
+    <pointsize>-1</pointsize>
    </font>
   </property>
   <property name="windowTitle">
-   <string>Laser cut box generator</string>
+   <string>Laser Cut Box Generator</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QLabel {
+   <string notr="true">*{
+	font-family: verdana;
+	font-size: 12px;
+}
+
+QLabel {
     max-width: 110px;
 	min-width: 110px;
 }
@@ -32,8 +38,17 @@ QLineEdit {
     max-width: 50px;
 }
 
-QLabel[whatsThis=&quot;title&quot;]{
-	color: red;
+QLabel[cssClass=&quot;title&quot;]{
+	font-size: 16px;
+	font-weight: bold;
+}
+
+QLabel::lblType{
+	max-width: 75;
+	min-width: -1;
+}
+
+QFrame#image{
 }
 </string>
   </property>
@@ -113,32 +128,26 @@ QLabel[whatsThis=&quot;title&quot;]{
      <rect>
       <x>20</x>
       <y>10</y>
-      <width>255</width>
-      <height>380</height>
+      <width>281</width>
+      <height>382</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QLabel" name="label_7">
-         <property name="font">
-          <font>
-           <family>MS Shell Dlg 2</family>
-           <pointsize>12</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
+        <widget class="QLabel" name="lblType">
          <property name="styleSheet">
-          <string notr="true">max-width: 75;
-min-width: -1;</string>
+          <string notr="true"/>
          </property>
          <property name="text">
           <string>Box type:</string>
          </property>
          <property name="buddy">
           <cstring>tabTypes</cstring>
+         </property>
+         <property name="cssClass" stdset="0">
+          <string>title</string>
          </property>
         </widget>
        </item>
@@ -190,14 +199,6 @@ min-width: -1;</string>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="font">
-        <font>
-         <family>MS Shell Dlg 2</family>
-         <pointsize>12</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
        <property name="whatsThis">
         <string>title</string>
        </property>
@@ -206,6 +207,9 @@ min-width: -1;</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+       <property name="cssClass" stdset="0">
+        <string>title</string>
        </property>
       </widget>
      </item>
@@ -407,8 +411,8 @@ min-width: -1;</string>
        </property>
        <property name="font">
         <font>
-         <family>MS Shell Dlg 2</family>
-         <pointsize>12</pointsize>
+         <family>verdana</family>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
          <bold>true</bold>
         </font>
@@ -421,6 +425,9 @@ min-width: -1;</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+       <property name="cssClass" stdset="0">
+        <string>title</string>
        </property>
       </widget>
      </item>
@@ -562,17 +569,20 @@ min-width: -1;</string>
      </item>
     </layout>
    </widget>
-   <widget class="QLabel" name="image">
+   <widget class="QFrame" name="image">
     <property name="geometry">
      <rect>
-      <x>290</x>
-      <y>10</y>
-      <width>110</width>
-      <height>147</height>
+      <x>331</x>
+      <y>11</y>
+      <width>161</width>
+      <height>261</height>
      </rect>
     </property>
-    <property name="text">
-     <string/>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
     </property>
    </widget>
   </widget>
@@ -581,8 +591,8 @@ min-width: -1;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
-     <height>21</height>
+     <width>530</width>
+     <height>20</height>
     </rect>
    </property>
   </widget>

@@ -5,7 +5,7 @@ import os
 from enum import Enum
 from typing import Optional
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QFrame
 from PyQt5.QtCore import QFile, Qt
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5 import uic
@@ -99,7 +99,7 @@ class Main(QMainWindow):
         ui_file.close()
 
         self.show()
-        self.image = self.findChild(QLabel, 'image')
+        self.image = self.findChild(QFrame, 'image')
         self._update_image(0)
 
         self.tabTypes.currentIndexChanged.connect(self._update_image)

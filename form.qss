@@ -1,0 +1,30 @@
+*{
+	font-family: verdana;
+	font-size: 12px;
+}
+
+QLabel {
+    max-width: 110px;
+	min-width: 110px;
+}
+
+QLabel#lblDim, QLabel#lblSpec {
+	max-width: -1;
+}
+
+QLineEdit {
+    max-width: 50px;
+}
+
+QLabel[cssClass="title"]{
+	font-size: 16px;
+	font-weight: bold;
+}
+
+QLabel::lblType{
+	max-width: 75;
+	min-width: -1;
+}
+
+QFrame#image{
+}
