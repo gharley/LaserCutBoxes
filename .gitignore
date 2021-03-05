@@ -73,3 +73,5 @@ Thumbs.db
 
 # JetBrains files
 \.idea/
+
+*.user

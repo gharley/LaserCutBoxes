@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>530</width>
+    <width>1040</width>
     <height>600</height>
    </rect>
   </property>
@@ -23,6 +23,10 @@
    <string notr="true">*{
 	font-family: verdana;
 	font-size: 12px;
+}
+
+QTextEdit{
+	border: 1px solid red;
 }
 
 QLabel {
@@ -569,13 +573,31 @@ QFrame#image{
      </item>
     </layout>
    </widget>
+   <widget class="QWidget" name="formLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>509</x>
+      <y>219</y>
+      <width>511</width>
+      <height>331</height>
+     </rect>
+    </property>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
+      <widget class="QTextEdit" name="textEdit"/>
+     </item>
+     <item row="0" column="1">
+      <widget class="QTextEdit" name="textEdit_2"/>
+     </item>
+    </layout>
+   </widget>
    <widget class="QFrame" name="image">
     <property name="geometry">
      <rect>
       <x>331</x>
       <y>11</y>
       <width>161</width>
-      <height>261</height>
+      <height>221</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -591,7 +613,7 @@ QFrame#image{
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>530</width>
+     <width>1040</width>
      <height>20</height>
     </rect>
    </property>
