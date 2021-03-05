@@ -40,7 +40,7 @@ class Main(QMainWindow):
     def __init__(self):
         super(Main, self).__init__()
 
-        self.image = Optional[QLabel]
+        self.image = Optional[QFrame]
         self.widget = Optional[QSvgWidget]
         self.props = DotDict()
         self.box_type = BoxType.All
@@ -79,7 +79,7 @@ class Main(QMainWindow):
         ui_file.close()
 
         self.show()
-        self.image = self.findChild(QFrame, 'image')
+        self.image = self.frmSide
         self._update_image(0)
 
         self.tabTypes.currentIndexChanged.connect(self._update_image)
@@ -87,8 +87,9 @@ class Main(QMainWindow):
 
     def _update_image(self, box_type):
         if not isinstance(self.widget, QSvgWidget):
-            self.widget = QSvgWidget(self)
+            self.widget = QSvgWidget(self.image)
             self.widget.setGeometry(self.image.geometry())
+            self.widget.setSizePolicy(self.image.sizePolicy())
 
         path = os.path.join(os.path.dirname(__file__), "images")
         box_type = BoxType(box_type)
