@@ -2,19 +2,12 @@ from lxml import etree as et
 
 
 class SVGCreator:
-    def __init__(self, width, height, lines):
+    def __init__(self):
         self._svg = None
-        self._create_boiler_plate(width, height)
-        self._create_body(lines)
 
     @property
     def svg(self):
-        return self._svg
-
-    CDATA = '''
-        .str0 {stroke:black;stroke-width:7.62;stroke-linejoin:bevel;stroke-miterlimit:2.61313} 
-        .fil0 {fill:none}
-    '''
+        return et.tostring(self._svg)
 
     def _create_boiler_plate(self, width, height):
         self._svg = et.Element('svg', {
@@ -27,9 +20,11 @@ class SVGCreator:
         })
 
     def _create_body(self, lines, for_export=False):
-        g = et.SubElement(self.svg, 'g', {
+        stroke_width = 7.62 if for_export else '20px'
+
+        g = et.SubElement(self._svg, 'g', {
             'id': 'boxPart',
-            'style': 'stroke:black;stroke-width:7.62;stroke-linejoin:miter;stroke-miterlimit:2.61313;fill:none;'})
+            'style': 'stroke:black;stroke-width:{0};stroke-linejoin:miter;stroke-miterlimit:2.61313;fill:none;'.format(stroke_width)})
 
         et.SubElement(g, 'metadata', {'id': 'Laser cut box by Greg Harley'})
 
@@ -43,12 +38,16 @@ class SVGCreator:
                 y2 = '-' + y2
 
             et.SubElement(g, 'line', {
-                'class': '.str0 .fil0',
                 'x1': '{0}'.format(int(line[0][0] * 100)),
                 'y1': y1,
                 'x2': '{0}'.format(int(line[1][0] * 100)),
-                'y2': y2,
+                'y2': y2
             })
+
+    def create_svg(self, width, height, lines, for_export=False):
+        self._create_boiler_plate(width, height)
+        self._create_body(lines, for_export)
+        return self.svg
 
     DOCTYPE = '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">'
 
