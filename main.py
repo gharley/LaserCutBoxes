@@ -5,9 +5,10 @@ import os
 from enum import Enum
 from typing import Optional
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QSizePolicy, QFrame
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QWidget, QSizePolicy, QFrame
 from PyQt5.QtCore import QFile, Qt
-from PyQt5.QtSvg import QSvgWidget
+from PyQt5.QtGui import QPainter
+from PyQt5.QtSvg import QSvgRenderer, QSvgWidget
 from PyQt5 import uic
 
 from BasicBox import Box
@@ -20,6 +21,17 @@ if hasattr(Qt, 'AA_EnableHighDpiScaling'):
 
 if hasattr(Qt, 'AA_UseHighDpiPixmaps'):
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
+
+
+class SVGImage(QWidget):
+    def __init__(self):
+        super(SVGImage, self).__init__()
+
+    def paintEvent(self, event):
+        painter = QPainter()
+        painter.begin(self)
+        self.super.paint(painter)
+        painter.end()
 
 
 # DotDict - easy dictionary access
@@ -41,7 +53,7 @@ class Main(QMainWindow):
     def __init__(self):
         super(Main, self).__init__()
 
-        self.side_image = Optional[QSvgWidget]
+        self.renderer = QSvgRenderer()
         self.end_image = Optional[QSvgWidget]
         self.bottom_image = Optional[QSvgWidget]
         self.props = DotDict()
@@ -68,19 +80,21 @@ class Main(QMainWindow):
         if self.chkSide.isChecked():
             box.build_long_side()
             creator.create_svg(box.outer_width, box.outer_height, box.side)
-            self.side_image.renderer().load(creator.svg)
-            self.side_image.show()
+            self.renderer.load(creator.svg)
+            painter = QPainter()
+            self.renderer.render(painter, 'imgSide')
+            self.imgSide.show()
 
         if self.chkEnd.isChecked():
             box.build_short_side()
             creator.create_svg(box.outer_depth, box.outer_height, box.end)
-            self.end_image.renderer().load(creator.svg)
+            self.end_image.load(creator.svg)
             self.end_image.show()
 
         if self.chkBottom.isChecked():
             box.build_bottom()
             creator.create_svg(box.depth, box.width, box.bottom)
-            self.bottom_image.renderer().load(creator.svg)
+            self.bottom_image.load(creator.svg)
             self.bottom_image.show()
 
     def _load_ui(self):
@@ -92,8 +106,9 @@ class Main(QMainWindow):
 
         self.show()
 
-        self.side_image = QSvgWidget(self.frmSide)
-        self.side_image.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        # self.side_image = QSvgWidget(self.frmSide)
+        # self.side_image.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.imgSide.__class__ = SVGImage
         self.end_image = QSvgWidget(self.frmEnd)
         self.end_image.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.bottom_image = QSvgWidget(self.frmBottom)
