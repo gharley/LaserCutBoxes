@@ -3,12 +3,10 @@ import sys
 import os
 
 from enum import Enum
-from typing import Optional
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QWidget, QSizePolicy, QFrame
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QGraphicsScene
 from PyQt5.QtCore import QFile, Qt
-from PyQt5.QtGui import QPainter
-from PyQt5.QtSvg import QSvgRenderer, QSvgWidget
+from PyQt5.QtGui import QPen, QColor, QPainter
 from PyQt5 import uic
 
 from BasicBox import Box
@@ -23,15 +21,13 @@ if hasattr(Qt, 'AA_UseHighDpiPixmaps'):
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
 
 
-class SVGImage(QWidget):
+class SVGScene(QGraphicsScene):
     def __init__(self):
-        super(SVGImage, self).__init__()
+        super(SVGScene, self).__init__()
 
-    def paintEvent(self, event):
-        painter = QPainter()
-        painter.begin(self)
-        self.super.paint(painter)
-        painter.end()
+    def add_lines(self, lines):
+        for line in lines:
+            self.addLine(line[0][0], -line[0][1], line[1][0], -line[1][1])
 
 
 # DotDict - easy dictionary access
@@ -53,11 +49,11 @@ class Main(QMainWindow):
     def __init__(self):
         super(Main, self).__init__()
 
-        self.renderer = QSvgRenderer()
-        self.end_image = Optional[QSvgWidget]
-        self.bottom_image = Optional[QSvgWidget]
         self.props = DotDict()
         self.box_type = BoxType.All
+        self.scnSide = SVGScene()
+        self.scnEnd = SVGScene()
+        self.scnBottom = SVGScene()
 
         self._load_ui()
 
@@ -75,27 +71,30 @@ class Main(QMainWindow):
     def _build_geometry(self):
         self._init_properties()
         box = Box(self.props)
-        creator = SVGCreator()
 
         if self.chkSide.isChecked():
             box.build_long_side()
-            creator.create_svg(box.outer_width, box.outer_height, box.side)
-            self.renderer.load(creator.svg)
-            painter = QPainter()
-            self.renderer.render(painter, 'imgSide')
+            self.scnSide.clear()
+            self.scnSide.add_lines(box.side)
+            self.imgSide.setScene(self.scnSide)
+            # painter = QPainter(self.imgSide)
+            # self.scnSide.render(painter)
             self.imgSide.show()
+            self.imgSide.scale(2.0, 2.0)
 
         if self.chkEnd.isChecked():
             box.build_short_side()
-            creator.create_svg(box.outer_depth, box.outer_height, box.end)
-            self.end_image.load(creator.svg)
-            self.end_image.show()
+            self.scnEnd.clear()
+            self.scnEnd.add_lines(box.end)
+            self.imgEnd.setScene(self.scnEnd)
+            self.imgEnd.show()
 
         if self.chkBottom.isChecked():
             box.build_bottom()
-            creator.create_svg(box.depth, box.width, box.bottom)
-            self.bottom_image.load(creator.svg)
-            self.bottom_image.show()
+            self.scnBottom.clear()
+            self.scnBottom.add_lines(box.bottom)
+            self.imgBottom.setScene(self.scnBottom)
+            self.imgBottom.show()
 
     def _load_ui(self):
         path = os.path.join(os.path.dirname(__file__), "form.ui")
@@ -106,16 +105,6 @@ class Main(QMainWindow):
 
         self.show()
 
-        # self.side_image = QSvgWidget(self.frmSide)
-        # self.side_image.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.imgSide.__class__ = SVGImage
-        self.end_image = QSvgWidget(self.frmEnd)
-        self.end_image.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.bottom_image = QSvgWidget(self.frmBottom)
-        self.bottom_image.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
-        # self._update_image(0)
-        #
         # self.tabTypes.currentIndexChanged.connect(self._update_image)
         self.btnGenerate.clicked.connect(self._build_geometry)
 

@@ -48,14 +48,6 @@ QLabel::lblType{
 	max-width: 75;
 	min-width: -1;
 }
-
-QWidget#imgSide, QFrame#frmEnd, QFrame#frmBottom{
-	border: 2px solid red;
-}
-
-QSVGWWidget{
-	margin: 20px;
-}
 </string>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -640,9 +632,6 @@ QSVGWWidget{
        <number>10</number>
       </property>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_4"/>
-      </item>
-      <item>
        <widget class="QGraphicsView" name="imgSide">
         <property name="verticalScrollBarPolicy">
          <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -653,51 +642,30 @@ QSVGWWidget{
         <property name="sizeAdjustPolicy">
          <enum>QAbstractScrollArea::AdjustToContents</enum>
         </property>
-        <property name="foregroundBrush">
-         <brush brushstyle="SolidPattern">
+        <property name="backgroundBrush">
+         <brush brushstyle="NoBrush">
           <color alpha="255">
-           <red>0</red>
-           <green>0</green>
-           <blue>0</blue>
+           <red>211</red>
+           <green>211</green>
+           <blue>211</blue>
           </color>
          </brush>
         </property>
-        <property name="renderHints">
-         <set>QPainter::Antialiasing|QPainter::HighQualityAntialiasing|QPainter::TextAntialiasing</set>
+        <property name="sceneRect">
+         <rectf>
+          <x>0.000000000000000</x>
+          <y>0.000000000000000</y>
+          <width>0.000000000000000</width>
+          <height>0.000000000000000</height>
+         </rectf>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="frmEnd">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-       </widget>
+       <widget class="QGraphicsView" name="imgEnd"/>
       </item>
       <item>
-       <widget class="QFrame" name="frmBottom">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-       </widget>
+       <widget class="QGraphicsView" name="imgBottom"/>
       </item>
      </layout>
     </item>
