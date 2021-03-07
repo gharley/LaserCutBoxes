@@ -3,10 +3,11 @@ import sys
 import os
 
 from enum import Enum
+from threading import Timer
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QGraphicsScene
-from PyQt5.QtCore import QFile, Qt
-from PyQt5.QtGui import QPen, QColor, QPainter
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QGraphicsScene, QGraphicsView
+from PyQt5.QtCore import QObject, QFile, Qt, QEvent
+from PyQt5.QtGui import QPen, QColor, QPainter, QResizeEvent, QTransform
 from PyQt5 import uic
 
 from BasicBox import Box
@@ -22,12 +23,39 @@ if hasattr(Qt, 'AA_UseHighDpiPixmaps'):
 
 
 class SVGScene(QGraphicsScene):
-    def __init__(self):
+    def __init__(self, view: QGraphicsView):
         super(SVGScene, self).__init__()
 
+        self.view = view
+        view.setScene(self)
+        view.installEventFilter(self)
+
     def add_lines(self, lines):
+        self.clear()
+        pen = QPen(QColor(0))
+        pen.setWidth(0)
+
         for line in lines:
-            self.addLine(line[0][0], -line[0][1], line[1][0], -line[1][1])
+            self.addLine(line[0][0], -line[0][1], line[1][0], -line[1][1], pen)
+
+        self.scale()
+
+    def eventFilter(self, watched: QObject, event: QEvent) -> bool:
+        if event.type() == QEvent.Resize:
+            timer = Timer(0.1, self.scale)
+            timer.start()
+
+        return False
+
+    def scale(self):
+        scene_rect = self.view.sceneRect()
+        if scene_rect.height() != 0:
+            self.view.setTransform(QTransform())
+            view_rect = self.view.rect()
+            height_aspect = view_rect.height() / scene_rect.height()
+            width_aspect = view_rect.width() / scene_rect.width()
+            scale = min(height_aspect, width_aspect)
+            self.view.scale(scale, scale)
 
 
 # DotDict - easy dictionary access
@@ -51,9 +79,9 @@ class Main(QMainWindow):
 
         self.props = DotDict()
         self.box_type = BoxType.All
-        self.scnSide = SVGScene()
-        self.scnEnd = SVGScene()
-        self.scnBottom = SVGScene()
+        self.scnSide = None
+        self.scnEnd = None
+        self.scnBottom = None
 
         self._load_ui()
 
@@ -74,27 +102,15 @@ class Main(QMainWindow):
 
         if self.chkSide.isChecked():
             box.build_long_side()
-            self.scnSide.clear()
             self.scnSide.add_lines(box.side)
-            self.imgSide.setScene(self.scnSide)
-            # painter = QPainter(self.imgSide)
-            # self.scnSide.render(painter)
-            self.imgSide.show()
-            self.imgSide.scale(2.0, 2.0)
 
         if self.chkEnd.isChecked():
             box.build_short_side()
-            self.scnEnd.clear()
             self.scnEnd.add_lines(box.end)
-            self.imgEnd.setScene(self.scnEnd)
-            self.imgEnd.show()
 
         if self.chkBottom.isChecked():
             box.build_bottom()
-            self.scnBottom.clear()
             self.scnBottom.add_lines(box.bottom)
-            self.imgBottom.setScene(self.scnBottom)
-            self.imgBottom.show()
 
     def _load_ui(self):
         path = os.path.join(os.path.dirname(__file__), "form.ui")
@@ -104,6 +120,10 @@ class Main(QMainWindow):
         ui_file.close()
 
         self.show()
+
+        self.scnSide = SVGScene(self.imgSide)
+        self.scnEnd = SVGScene(self.imgEnd)
+        self.scnBottom = SVGScene(self.imgBottom)
 
         # self.tabTypes.currentIndexChanged.connect(self._update_image)
         self.btnGenerate.clicked.connect(self._build_geometry)

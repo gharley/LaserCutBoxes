@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>714</width>
-    <height>648</height>
+    <width>940</width>
+    <height>653</height>
    </rect>
   </property>
   <property name="font">
@@ -651,21 +651,27 @@ QLabel::lblType{
           </color>
          </brush>
         </property>
-        <property name="sceneRect">
-         <rectf>
-          <x>0.000000000000000</x>
-          <y>0.000000000000000</y>
-          <width>0.000000000000000</width>
-          <height>0.000000000000000</height>
-         </rectf>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGraphicsView" name="imgEnd">
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QGraphicsView" name="imgEnd"/>
-      </item>
-      <item>
-       <widget class="QGraphicsView" name="imgBottom"/>
+       <widget class="QGraphicsView" name="imgBottom">
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -676,7 +682,7 @@ QLabel::lblType{
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>714</width>
+     <width>940</width>
      <height>20</height>
     </rect>
    </property>
