@@ -691,8 +691,32 @@ QGraphicsView{
      <height>25</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionGenerate_Drawings"/>
+    <addaction name="actionSave_Drawings"/>
+   </widget>
+   <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionGenerate_Drawings">
+   <property name="text">
+    <string>&amp;Generate Drawings</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+G</string>
+   </property>
+  </action>
+  <action name="actionSave_Drawings">
+   <property name="text">
+    <string>&amp;Save Drawings</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+S</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>cboBoxType</tabstop>

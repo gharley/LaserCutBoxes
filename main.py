@@ -2,7 +2,7 @@
 import sys
 import os
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QFileDialog
 from PyQt5.QtCore import QFile, Qt
 from PyQt5 import uic
 
@@ -25,9 +25,12 @@ class Main(QMainWindow):
         super(Main, self).__init__()
 
         self.props = DotDict()
+        self.box = None
+
         self.scnSide = None
         self.scnEnd = None
         self.scnBottom = None
+        self.last_dir = ''
 
         self._load_ui()
 
@@ -41,22 +44,6 @@ class Main(QMainWindow):
                     self.props.box_type = BoxType(buddy.currentIndex())
                 else:
                     self.props[buddy_name] = int(buddy.text()) if buddy_name.startswith('num') else float(buddy.text())
-
-    def _build_geometry(self):
-        self._init_properties()
-        box = Box(self.props)
-
-        if self.chkSide.isChecked():
-            box.build_long_side()
-            self.scnSide.add_lines(box.side)
-
-        if self.chkEnd.isChecked():
-            box.build_short_side()
-            self.scnEnd.add_lines(box.end)
-
-        if self.chkBottom.isChecked():
-            box.build_bottom()
-            self.scnBottom.add_lines(box.bottom)
 
     def _load_ui(self):
         path = os.path.join(os.path.dirname(__file__), "form.ui")
@@ -73,9 +60,52 @@ class Main(QMainWindow):
 
         self.cboBoxType.currentIndexChanged.connect(self._set_box_type)
         self.btnGenerate.clicked.connect(self._build_geometry)
+        self.actionGenerate_Drawings.triggered.connect(self._build_geometry)
+        self.actionSave_Drawings.triggered.connect(self._save_drawings)
+
+    # Slots and Actions
+    def _build_geometry(self):
+        self._init_properties()
+        box = self.box = Box(self.props)
+
+        if self.chkSide.isChecked():
+            box.build_long_side()
+            self.scnSide.add_lines(box.side)
+
+        if self.chkEnd.isChecked():
+            box.build_short_side()
+            self.scnEnd.add_lines(box.end)
+
+        if self.chkBottom.isChecked():
+            box.build_bottom()
+            self.scnBottom.add_lines(box.bottom)
 
     def _set_box_type(self, box_type):
         self.props.box_type = BoxType(box_type)
+
+    def _save_drawings(self):
+        options = QFileDialog.ShowDirsOnly
+        dir_name = QFileDialog.getExistingDirectory(None, 'Select Destination Folder', self.last_dir, options)
+        if dir_name:
+            self.last_dir = dir_name
+
+            if self.box is None:
+                return
+
+            box = self.box
+            creator = SVGCreator()
+
+            if self.chkSide.isChecked():
+                creator.create_svg(box.outer_width, box.outer_height, box.side, True)
+                creator.write_file('{0}/{1}'.format(dir_name, 'side.svg'))
+
+            if self.chkEnd.isChecked():
+                creator.create_svg(box.outer_depth, box.outer_height, box.end, True)
+                creator.write_file('{0}/{1}'.format(dir_name, 'end.svg'))
+
+            if self.chkBottom.isChecked():
+                creator.create_svg(box.width, box.depth, box.bottom, True)
+                creator.write_file('{0}/{1}'.format(dir_name, 'bottom.svg'))
 
 
 if __name__ == "__main__":

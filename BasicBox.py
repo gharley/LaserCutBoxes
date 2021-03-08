@@ -5,13 +5,9 @@ __date__ = "12/31/20"
 
 __Comment__ = "This module creates a sketch of a laser cut box which can then be saved to an SVG file."
 
-import sys
 import numpy as np
 
 from enum import Enum
-from typing import Optional
-
-from PyQt5 import QtWidgets, QtSvg
 
 from common import DotDict, BoxType
 
@@ -42,14 +38,8 @@ class Face(Enum):
     BOTTOM = 3
 
 
-App = QtWidgets.QApplication(sys.argv)
-
-
 class Box:
     def __init__(self, props):
-        self.image = Optional[QtWidgets.QLabel]
-        self.widget = Optional[QtSvg.QSvgWidget]
-
         self.props = props
         self._bottom = []
         self._end = []
