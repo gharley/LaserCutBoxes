@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>940</width>
-    <height>653</height>
+    <width>590</width>
+    <height>650</height>
    </rect>
   </property>
   <property name="font">
    <font>
     <family>verdana</family>
-    <pointsize>-1</pointsize>
+    <pointsize>12</pointsize>
    </font>
   </property>
   <property name="windowTitle">
@@ -22,13 +22,13 @@
   <property name="styleSheet">
    <string notr="true">*{
 	font-family: verdana;
-	font-size: 12px;
+	font-size: 12pt;
 	color: green;
 }
 
 QLabel {
-    max-width: 110px;
-	min-width: 110px;
+    max-width: 8em;
+	min-width: 8em;
 }
 
 QLabel#lblDim, QLabel#lblSpec {
@@ -36,17 +36,22 @@ QLabel#lblDim, QLabel#lblSpec {
 }
 
 QLineEdit {
-    max-width: 50px;
+    max-width: 3em;
 }
 
 QLabel[cssClass=&quot;title&quot;]{
-	font-size: 16px;
+	font-size: 1.35em;
 	font-weight: bold;
 }
 
 QLabel::lblType{
 	max-width: 75;
 	min-width: -1;
+}
+
+QGraphicsView{
+	min-width: 10em;
+	min-height: 5em;
 }
 </string>
   </property>
@@ -86,7 +91,7 @@ QLabel::lblType{
            <string>Box type:</string>
           </property>
           <property name="buddy">
-           <cstring>tabTypes</cstring>
+           <cstring>cboBoxType</cstring>
           </property>
           <property name="cssClass" stdset="0">
            <string>title</string>
@@ -94,7 +99,7 @@ QLabel::lblType{
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="tabTypes">
+         <widget class="QComboBox" name="cboBoxType">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -385,7 +390,7 @@ QLabel::lblType{
         <property name="font">
          <font>
           <family>verdana</family>
-          <pointsize>-1</pointsize>
+          <pointsize>12</pointsize>
           <weight>75</weight>
           <bold>true</bold>
          </font>
@@ -682,13 +687,33 @@ QLabel::lblType{
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>940</width>
-     <height>20</height>
+     <width>590</width>
+     <height>25</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <tabstops>
+  <tabstop>cboBoxType</tabstop>
+  <tabstop>width</tabstop>
+  <tabstop>depth</tabstop>
+  <tabstop>height</tabstop>
+  <tabstop>thickness</tabstop>
+  <tabstop>bottomThickness</tabstop>
+  <tabstop>lidThickness</tabstop>
+  <tabstop>tabWidth</tabstop>
+  <tabstop>numTabsWidth</tabstop>
+  <tabstop>numTabsDepth</tabstop>
+  <tabstop>numTabsHeight</tabstop>
+  <tabstop>chkSide</tabstop>
+  <tabstop>chkEnd</tabstop>
+  <tabstop>chkBottom</tabstop>
+  <tabstop>btnGenerate</tabstop>
+  <tabstop>imgSide</tabstop>
+  <tabstop>imgEnd</tabstop>
+  <tabstop>imgBottom</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -2,12 +2,11 @@
 import sys
 import os
 
-from enum import Enum
-
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox
 from PyQt5.QtCore import QFile, Qt
 from PyQt5 import uic
 
+from common import DotDict, BoxType
 from BasicBox import Box
 from SVGScene import SVGScene
 from SVGCreator import SVGCreator
@@ -21,27 +20,11 @@ if hasattr(Qt, 'AA_UseHighDpiPixmaps'):
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
 
 
-# DotDict - easy dictionary access
-class DotDict(dict):
-    """dot.notation access to dictionary attributes"""
-    __getattr__ = dict.get
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
-
-
-# Box type enums
-class BoxType(Enum):
-    All = 0
-    SLOTS = 1
-    TABS = 2
-
-
 class Main(QMainWindow):
     def __init__(self):
         super(Main, self).__init__()
 
         self.props = DotDict()
-        self.box_type = BoxType.All
         self.scnSide = None
         self.scnEnd = None
         self.scnBottom = None
@@ -88,7 +71,11 @@ class Main(QMainWindow):
         self.scnEnd = SVGScene(self.imgEnd)
         self.scnBottom = SVGScene(self.imgBottom)
 
+        self.cboBoxType.currentIndexChanged.connect(self._set_box_type)
         self.btnGenerate.clicked.connect(self._build_geometry)
+
+    def _set_box_type(self, box_type):
+        self.props.box_type = BoxType(box_type)
 
 
 if __name__ == "__main__":

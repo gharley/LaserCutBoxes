@@ -11,7 +11,9 @@ import numpy as np
 from enum import Enum
 from typing import Optional
 
-from PyQt5 import uic, QtCore, QtWidgets, QtGui, QtSvg
+from PyQt5 import QtWidgets, QtSvg
+
+from common import DotDict, BoxType
 
 # Indexes for geoid
 START = 1
@@ -25,27 +27,12 @@ BOTTOM = 2
 LEFT = 3
 
 
-# Box type enums
-class BoxType(Enum):
-    All = 0
-    SLOTS = 1
-    TABS = 2
-
-
 # Directional enums for drawing edges
 class Direction(Enum):
     EAST = 1
     SOUTH = 2
     WEST = 3
     NORTH = 4
-
-
-# DotDict - easy dictionary access
-class DotDict(dict):
-    """dot.notation access to dictionary attributes"""
-    __getattr__ = dict.get
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
 
 
 # Face enums for drawing edges
@@ -158,6 +145,7 @@ class Box:
         side.extend(self.draw_edge_tabs(face, Direction.WEST, False, outer_height, lower_left))
 
     def build_bottom(self):
+        self._bottom = []
         width = self.props.width
         depth = self.props.depth
 
@@ -169,9 +157,11 @@ class Box:
         self._bottom.extend(self.draw_edge_tabs(Face.BOTTOM, Direction.SOUTH, False, width, lower_right))
 
     def build_long_side(self):
+        self._side = []
         self._build_side(Face.SIDE, self.draw_side_slots)
 
     def build_short_side(self):
+        self._end = []
         self._build_side(Face.END, self.draw_end_slots)
 
     def draw_slot(self, width, height, offset):

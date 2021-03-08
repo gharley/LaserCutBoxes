@@ -1,12 +1,12 @@
 *{
 	font-family: verdana;
-	font-size: 12px;
+	font-size: 12pt;
 	color: green;
 }
 
 QLabel {
-    max-width: 110px;
-	min-width: 110px;
+    max-width: 8em;
+	min-width: 8em;
 }
 
 QLabel#lblDim, QLabel#lblSpec {
@@ -14,11 +14,11 @@ QLabel#lblDim, QLabel#lblSpec {
 }
 
 QLineEdit {
-    max-width: 50px;
+    max-width: 3em;
 }
 
 QLabel[cssClass="title"]{
-	font-size: 16px;
+	font-size: 1.35em;
 	font-weight: bold;
 }
 
@@ -27,10 +27,7 @@ QLabel::lblType{
 	min-width: -1;
 }
 
-QFrame#frmSide, QFrame#frmEnd, QFrame#frmBottom{
-	border: 2px solid red;
-}
-
-QSVGWWidget{
-	margin: 20px;
+QGraphicsView{
+	min-width: 10em;
+	min-height: 5em;
 }
