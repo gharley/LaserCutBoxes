@@ -3,14 +3,13 @@ import sys
 import os
 
 from enum import Enum
-from threading import Timer
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QGraphicsScene, QGraphicsView
-from PyQt5.QtCore import QObject, QFile, Qt, QEvent
-from PyQt5.QtGui import QPen, QColor, QPainter, QResizeEvent, QTransform
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox
+from PyQt5.QtCore import QFile, Qt
 from PyQt5 import uic
 
 from BasicBox import Box
+from SVGScene import SVGScene
 from SVGCreator import SVGCreator
 
 
@@ -20,42 +19,6 @@ if hasattr(Qt, 'AA_EnableHighDpiScaling'):
 
 if hasattr(Qt, 'AA_UseHighDpiPixmaps'):
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
-
-
-class SVGScene(QGraphicsScene):
-    def __init__(self, view: QGraphicsView):
-        super(SVGScene, self).__init__()
-
-        self.view = view
-        view.setScene(self)
-        view.installEventFilter(self)
-
-    def add_lines(self, lines):
-        self.clear()
-        pen = QPen(QColor(0))
-        pen.setWidth(0)
-
-        for line in lines:
-            self.addLine(line[0][0], -line[0][1], line[1][0], -line[1][1], pen)
-
-        self.scale()
-
-    def eventFilter(self, watched: QObject, event: QEvent) -> bool:
-        if event.type() == QEvent.Resize:
-            timer = Timer(0.1, self.scale)
-            timer.start()
-
-        return False
-
-    def scale(self):
-        scene_rect = self.view.sceneRect()
-        if scene_rect.height() != 0:
-            self.view.setTransform(QTransform())
-            view_rect = self.view.rect()
-            height_aspect = view_rect.height() / scene_rect.height()
-            width_aspect = view_rect.width() / scene_rect.width()
-            scale = min(height_aspect, width_aspect)
-            self.view.scale(scale, scale)
 
 
 # DotDict - easy dictionary access
@@ -125,20 +88,7 @@ class Main(QMainWindow):
         self.scnEnd = SVGScene(self.imgEnd)
         self.scnBottom = SVGScene(self.imgBottom)
 
-        # self.tabTypes.currentIndexChanged.connect(self._update_image)
         self.btnGenerate.clicked.connect(self._build_geometry)
-
-    def _update_image(self, box_type):
-        path = os.path.join(os.path.dirname(__file__), "images")
-        box_type = BoxType(box_type)
-        if box_type == BoxType.All:
-            self.side_image.renderer().load(os.path.join(path, 'end_all.svg'))
-        elif box_type == BoxType.SLOTS:
-            self.side_image.renderer().load(os.path.join(path, 'end_slots.svg'))
-        else:
-            self.side_image.renderer().load(os.path.join(path, 'end_edge.svg'))
-
-        self.side_image.show()
 
 
 if __name__ == "__main__":
