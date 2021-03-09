@@ -1,9 +1,10 @@
 # This Python file uses the following encoding: utf-8
 import sys
 import os
+import json
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QFileDialog
-from PyQt5.QtCore import QFile, Qt
+from PyQt5.QtCore import QFile, Qt, QObject, QEvent
 from PyQt5 import uic
 
 from common import DotDict, BoxType
@@ -24,15 +25,22 @@ class Main(QMainWindow):
     def __init__(self):
         super(Main, self).__init__()
 
+        self.config = DotDict()
         self.props = DotDict()
+        self.config.last_dir = ''
+
         self.box = None
 
         self.scnSide = None
         self.scnEnd = None
         self.scnBottom = None
-        self.last_dir = ''
 
+        self._load_config()
         self._load_ui()
+
+    def closeEvent(self, event) -> None:
+        with open('config.json', 'w') as out_file:
+            json.dump(self.config, out_file)
 
     def _init_properties(self):
         for obj in self.findChildren(QLabel):
@@ -44,6 +52,10 @@ class Main(QMainWindow):
                     self.props.box_type = BoxType(buddy.currentIndex())
                 else:
                     self.props[buddy_name] = int(buddy.text()) if buddy_name.startswith('num') else float(buddy.text())
+
+    def _load_config(self):
+        with open('config.json', 'r') as in_file:
+            self.config = DotDict(json.load(in_file))
 
     def _load_ui(self):
         path = os.path.join(os.path.dirname(__file__), "form.ui")
@@ -84,10 +96,13 @@ class Main(QMainWindow):
         self.props.box_type = BoxType(box_type)
 
     def _save_drawings(self):
-        options = QFileDialog.ShowDirsOnly
-        dir_name = QFileDialog.getExistingDirectory(None, 'Select Destination Folder', self.last_dir, options)
+        dialog = QFileDialog()
+        options = QFileDialog.options(dialog)
+        options &= ~QFileDialog.ShowDirsOnly
+
+        dir_name = dialog.getExistingDirectory(None, 'Select Destination Folder', self.config.last_dir, options)
         if dir_name:
-            self.last_dir = dir_name
+            self.config.last_dir = dir_name
 
             if self.box is None:
                 return
