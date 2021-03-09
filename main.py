@@ -96,15 +96,15 @@ class Main(QMainWindow):
             creator = SVGCreator()
 
             if self.chkSide.isChecked():
-                creator.create_svg(box.outer_width, box.outer_height, box.side, True)
+                creator.create_svg(box.outer_width, box.outer_height, box.side)
                 creator.write_file('{0}/{1}'.format(dir_name, 'side.svg'))
 
             if self.chkEnd.isChecked():
-                creator.create_svg(box.outer_depth, box.outer_height, box.end, True)
+                creator.create_svg(box.outer_depth, box.outer_height, box.end)
                 creator.write_file('{0}/{1}'.format(dir_name, 'end.svg'))
 
             if self.chkBottom.isChecked():
-                creator.create_svg(box.width, box.depth, box.bottom, True)
+                creator.create_svg(box.outer_width, box.outer_depth, box.bottom)
                 creator.write_file('{0}/{1}'.format(dir_name, 'bottom.svg'))
 
 

@@ -122,7 +122,7 @@ class Box:
         side = self._side if face is Face.SIDE else self._end
 
         if self.props.box_type != BoxType.TABS:
-            side.extend(tab_func(outer_height))
+            side.extend(tab_func())
 
         side.append((upper_left, upper_right))
         side.extend(self.draw_edge_tabs(face, Direction.EAST, True, outer_height, upper_right))
@@ -175,12 +175,12 @@ class Box:
 
         return tabs
 
-    def draw_end_slots(self, height):
-        start = self.vector(self.props.endGap, height - self.props.lidThickness - self.props.bottomThickness)
+    def draw_end_slots(self):
+        start = self.vector(self.props.endGap, -(self.props.lidThickness + self.props.bottomThickness))
         return self._draw_slots(self.props.numTabsDepth, self.props.endGap, start)
 
-    def draw_side_slots(self, height):
-        start = self.vector(self.props.sideGap, height - self.props.lidThickness - self.props.bottomThickness)
+    def draw_side_slots(self):
+        start = self.vector(self.props.sideGap, -(self.props.lidThickness + self.props.bottomThickness))
         return self._draw_slots(self.props.numTabsWidth, self.props.sideGap, start)
 
     def draw_edge_tabs(self, face, direction, is_inset, length, start):
@@ -268,16 +268,12 @@ class Box:
     # Helper methods
     @staticmethod
     def get_vectors(width, height):
-        lower_left = Box.vector(0, 0)
-        upper_left = Box.vector(0, height)
-        lower_right = Box.vector(width, 0)
-        upper_right = Box.vector(width, height)
+        lower_left = Box.vector(0, -height)
+        upper_left = Box.vector(0, 0)
+        lower_right = Box.vector(width, -height)
+        upper_right = Box.vector(width, 0)
 
         return lower_left, upper_left, lower_right, upper_right
-
-    @staticmethod
-    def log(message):
-        App.Console.PrintMessage(str(message) + '\n')
 
     @staticmethod
     def vector(x, y):
