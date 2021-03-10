@@ -1,17 +1,17 @@
 # This Python file uses the following encoding: utf-8
-import sys
-import os
 import json
+import sys, os
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QFileDialog
-from PyQt5.QtCore import QFile, Qt, QObject, QEvent
 from PyQt5 import uic
+from PyQt5.QtCore import QFile, Qt
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QFileDialog
 
-from common import DotDict, BoxType
 from BasicBox import Box
-from SVGScene import SVGScene
 from SVGCreator import SVGCreator
+from SVGScene import SVGScene
+from common import DotDict, BoxType
 
+import main_rc
 
 # Handle high res monitors
 if hasattr(Qt, 'AA_EnableHighDpiScaling'):
@@ -54,12 +54,12 @@ class Main(QMainWindow):
                     self.props[buddy_name] = int(buddy.text()) if buddy_name.startswith('num') else float(buddy.text())
 
     def _load_config(self):
-        with open('config.json', 'r') as in_file:
-            self.config = DotDict(json.load(in_file))
+        if os.path.exists('config.json'):
+            with open('config.json', 'r') as in_file:
+                self.config = DotDict(json.load(in_file))
 
     def _load_ui(self):
-        path = os.path.join(os.path.dirname(__file__), "form.ui")
-        ui_file = QFile(path)
+        ui_file = QFile(':resources/form.ui')
         ui_file.open(QFile.ReadOnly)
         uic.loadUi(ui_file, self)
         ui_file.close()
@@ -94,6 +94,9 @@ class Main(QMainWindow):
 
     def _set_box_type(self, box_type):
         self.props.box_type = BoxType(box_type)
+
+    def _set_control_states(self):
+        pass
 
     def _save_drawings(self):
         dialog = QFileDialog()
