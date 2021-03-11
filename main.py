@@ -74,6 +74,9 @@ class Main(QMainWindow):
         self.btnGenerate.clicked.connect(self._build_geometry)
         self.actionGenerate_Drawings.triggered.connect(self._build_geometry)
         self.actionSave_Drawings.triggered.connect(self._save_drawings)
+        self.actionLoad_Specifications.triggered.connect(self._load_specs)
+        self.actionSave_Specifications.triggered.connect(self._save_specs)
+        self.actionExit.triggered.connect(self.close)
 
     # Slots and Actions
     def _build_geometry(self):
@@ -92,10 +95,7 @@ class Main(QMainWindow):
             box.build_bottom()
             self.scnBottom.add_lines(box.bottom)
 
-    def _set_box_type(self, box_type):
-        self.props.box_type = BoxType(box_type)
-
-    def _set_control_states(self):
+    def _load_specs(self):
         pass
 
     def _save_drawings(self):
@@ -124,6 +124,15 @@ class Main(QMainWindow):
             if self.chkBottom.isChecked():
                 creator.create_svg(box.outer_width, box.outer_depth, box.bottom)
                 creator.write_file('{0}/{1}'.format(dir_name, 'bottom.svg'))
+
+    def _save_specs(self):
+        pass
+
+    def _set_box_type(self, box_type):
+        self.props.box_type = BoxType(box_type)
+
+    def _set_control_states(self):
+        pass
 
 
 if __name__ == "__main__":
