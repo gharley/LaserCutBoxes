@@ -4,7 +4,7 @@ import sys, os
 
 from PyQt5 import uic
 from PyQt5.QtCore import QFile, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QFileDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QComboBox, QLineEdit, QCheckBox, QFileDialog
 
 from BasicBox import Box
 from SVGCreator import SVGCreator
@@ -27,7 +27,8 @@ class Main(QMainWindow):
 
         self.config = DotDict()
         self.props = DotDict()
-        self.config.last_dir = ''
+        self.config.export_dir = ''
+        self.config.spec_dir = ''
 
         self.box = None
 
@@ -96,16 +97,34 @@ class Main(QMainWindow):
             self.scnBottom.add_lines(box.bottom)
 
     def _load_specs(self):
-        pass
+        dialog = QFileDialog()
+
+        dir_name = dialog.getOpenFileName(None, 'Load Specifications', self.props.spec_dir, 'Specifications (*.spec)')
+        if dir_name:
+            self.props.spec_dir = dir_name[0]
+
+            with open(dir_name[0], 'r') as in_file:
+                specs = DotDict(json.load(in_file))
+
+            for key, value in specs.items():
+                widget = self.findChild(QWidget, key)
+                if widget is None: continue
+
+                if key.startswith('chk'):
+                    widget.setChecked(value)
+                else:
+                    widget.setText(value)
+
+            self.update()
 
     def _save_drawings(self):
         dialog = QFileDialog()
         options = QFileDialog.options(dialog)
         options &= ~QFileDialog.ShowDirsOnly
 
-        dir_name = dialog.getExistingDirectory(None, 'Select Destination Folder', self.config.last_dir, options)
+        dir_name = dialog.getExistingDirectory(None, 'Select Destination Folder', self.config.export_dir, options)
         if dir_name:
-            self.config.last_dir = dir_name
+            self.config.export_dir = dir_name
 
             if self.box is None:
                 return
@@ -126,7 +145,21 @@ class Main(QMainWindow):
                 creator.write_file('{0}/{1}'.format(dir_name, 'bottom.svg'))
 
     def _save_specs(self):
-        pass
+        dialog = QFileDialog()
+
+        dir_name = dialog.getSaveFileName(None, 'Save Specifications', self.props.spec_dir, 'Specifications (*.spec)')
+        if dir_name:
+            self.props.spec_dir = dir_name[0]
+
+            specs = DotDict()
+            for child in self.findChildren(QLineEdit):
+                specs[child.objectName()] = child.text()
+
+            for child in self.findChildren(QCheckBox):
+                specs[child.objectName()] = child.isChecked()
+
+            with open(dir_name[0], 'w') as out_file:
+                json.dump(specs, out_file)
 
     def _set_box_type(self, box_type):
         self.props.box_type = BoxType(box_type)
