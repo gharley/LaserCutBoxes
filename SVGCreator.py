@@ -16,23 +16,24 @@ class SVGCreator:
             'height': '{0}mm'.format(height),
             'version': '1.1',
             'style': 'shape-rendering:geometricPrecision',
-            'viewBox': '0 0 {0} {1}'.format(int(width * 100), int(height * 100))
+            'viewBox': '0 0 {0} {1}'.format(width, height)
         })
 
     def _create_body(self, lines):
         g = et.SubElement(self._svg, 'g', {
             'id': 'boxPart',
-            'style': 'stroke:black;stroke-width:7.62;stroke-linejoin:miter;stroke-miterlimit:2.61313;fill:none;'
+            'style': 'stroke:black;stroke-width:0;stroke-linejoin:miter;stroke-miterlimit:2.61313;fill:none;',
+            'transform': 'scale(1, -1)'
         })
 
         et.SubElement(g, 'metadata', {'id': 'Laser cut box by Greg Harley'})
 
         for line in lines:
             et.SubElement(g, 'line', {
-                'x1': '{0}'.format(int(line[0][0] * 100)),
-                'y1': '{0}'.format(-int(line[0][1] * 100)),
-                'x2': '{0}'.format(int(line[1][0] * 100)),
-                'y2': '{0}'.format(-int(line[1][1] * 100))
+                'x1': str(line[0][0]),
+                'y1': str(line[0][1]),
+                'x2': str(line[1][0]),
+                'y2': str(line[1][1])
             })
 
     def create_svg(self, width, height, lines):

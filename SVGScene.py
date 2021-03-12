@@ -19,7 +19,7 @@ class SVGScene(QGraphicsScene):
         pen.setWidth(0)
 
         for line in lines:
-            self.addLine(line[0][0], -line[0][1], line[1][0], -line[1][1], pen)
+            self.addLine(line[0][0], line[0][1], line[1][0], line[1][1], pen)
 
         self.scale()
 
@@ -38,4 +38,4 @@ class SVGScene(QGraphicsScene):
             height_aspect = view_rect.height() / scene_rect.height()
             width_aspect = view_rect.width() / scene_rect.width()
             scale = min(height_aspect, width_aspect) * 0.95  # leave a little margin
-            self.view.scale(scale, scale)
+            self.view.scale(scale, -scale)
