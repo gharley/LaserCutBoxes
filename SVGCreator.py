@@ -1,4 +1,5 @@
 from lxml import etree as et
+import numpy as np
 
 
 class SVGCreator:
@@ -27,14 +28,29 @@ class SVGCreator:
         })
 
         et.SubElement(g, 'metadata', {'id': 'Laser cut box by Greg Harley'})
+        paths = []
+        path_data = []
+        line_mask = 'L {0} {1} '
+        move_mask = 'M {0} {1} '
 
-        for line in lines:
-            et.SubElement(g, 'line', {
-                'x1': str(line[0][0]),
-                'y1': str(line[0][1]),
-                'x2': str(line[1][0]),
-                'y2': str(line[1][1])
-            })
+        for idx in range(0, len(lines)):
+            line = lines[idx]
+            if idx > 0:
+                prev_line = lines[idx - 1]
+                if not (np.isclose(prev_line[1][0], line[0][0]) and np.isclose(prev_line[1][1], line[0][1])):
+                    paths.append(''.join(path_data))
+                    path_data = []
+
+            if len(path_data) == 0:
+                path_data.append(move_mask.format(line[0][0], line[0][1]))
+
+            path_data.append(line_mask.format(line[1][0], line[1][1]))
+
+        if len(path_data) > 0:
+            paths.append(''.join(path_data))
+
+        for path in paths:
+            et.SubElement(g, 'path', {'d': path})
 
     def create_svg(self, width, height, lines):
         self._create_boiler_plate(width, height)

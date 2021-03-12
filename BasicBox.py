@@ -121,9 +121,6 @@ class Box:
 
         side = self._side if face is Face.SIDE else self._end
 
-        if self.props.box_type != BoxType.TABS:
-            side.extend(tab_func())
-
         side.append((upper_left, upper_right))
         side.extend(self.draw_edge_tabs(face, Direction.EAST, True, outer_height, upper_right))
 
@@ -133,6 +130,9 @@ class Box:
             side.append((lower_right, lower_left))
 
         side.extend(self.draw_edge_tabs(face, Direction.WEST, False, outer_height, lower_left))
+
+        if self.props.box_type != BoxType.TABS:
+            side.extend(tab_func())
 
     def build_bottom(self):
         self._bottom = []
@@ -192,6 +192,9 @@ class Box:
 
         def add_line(start_point, end_offset):
             end_point = start_point + end_offset
+            if abs(end_point[0]) < 0.0001: end_point[0] = 0.0
+            if abs(end_point[1]) < 0.0001: end_point[1] = 0.0
+
             new_line = (start_point, end_point)
 
             lines.append(new_line)
@@ -249,7 +252,7 @@ class Box:
             tab_length = self.vector(config.tabWidth, 0)
             thickness_length = self.vector(0, config.thickness)
 
-        line = (0, 0)
+        line = (0, 0)  # something's wrong if this value gets used
 
         for idx in range(0, int(config.numTabs)):
             if idx == 0:
@@ -278,4 +281,3 @@ class Box:
     @staticmethod
     def vector(x, y):
         return np.array([x, y])
-
