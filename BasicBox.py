@@ -244,7 +244,7 @@ class Box:
             if face is Face.BOTTOM:
                 first_offset = last_offset = self.vector(config.longOffset, 0)
             else:
-                offset = self.vector(config.thickness / 2.0, 0)
+                offset = self.vector(self.props.thickness / 2.0, 0)
                 first_offset = self.vector(config.longOffset, 0) - offset
                 last_offset = self.vector(config.longOffset, 0) + offset
 
