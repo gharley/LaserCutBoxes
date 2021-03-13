@@ -96,9 +96,15 @@ class Box:
         if self.props.numTabsDepth == 0:
             self.props.numTabsDepth = self.props.numTabsWidth
 
-        self.props.sideGap = float((self.props.width - self.props.numTabsWidth * self.props.tabWidth) / (self.props.numTabsWidth + 1))
-        self.props.endGap = float((self.props.depth - self.props.numTabsDepth * self.props.tabWidth) / (self.props.numTabsDepth + 1))
-        self.props.heightGap = float((self.props.height - self.props.numTabsHeight * self.props.tabWidth) / (self.props.numTabsHeight + 1))
+        if self.props.edgeTabWidth == 0:
+            self.props.edgeTabWidth = self.props.tabWidth
+
+        def calc_gap(width, num_tabs, tab_width):
+            return float((width - num_tabs * tab_width) / (num_tabs + 1))
+
+        self.props.sideGap = calc_gap(self.props.width, self.props.numTabsWidth, self.props.tabWidth)
+        self.props.endGap = calc_gap(self.props.depth, self.props.numTabsDepth, self.props.tabWidth)
+        self.props.heightGap = calc_gap(self.props.height, self.props.numTabsHeight, self.props.edgeTabWidth)
 
         if self.props.box_type == BoxType.All:
             self.props.outerHeight = self.props.height + self.props.lidThickness + self.props.bottomThickness * 2
@@ -186,7 +192,7 @@ class Box:
     def draw_edge_tabs(self, face, direction, is_inset, length, start):
         is_vertical = direction is Direction.EAST or direction is Direction.WEST
         config = DotDict()
-        config.tabWidth = self.props.tabWidth
+        config.tabWidth = self.props.edgeTabWidth if is_vertical and face is not Face.BOTTOM else self.props.tabWidth
 
         lines = []
 

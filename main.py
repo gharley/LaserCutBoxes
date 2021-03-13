@@ -112,6 +112,8 @@ class Main(QMainWindow):
 
                 if key.startswith('chk'):
                     widget.setChecked(value)
+                elif key.startswith('cbo'):
+                    widget.setCurrentIndex(value)
                 else:
                     widget.setText(value)
 
@@ -157,6 +159,9 @@ class Main(QMainWindow):
 
             for child in self.findChildren(QCheckBox):
                 specs[child.objectName()] = child.isChecked()
+
+            for child in self.findChildren(QComboBox):
+                specs[child.objectName()] = child.currentIndex()
 
             with open(dir_name[0], 'w') as out_file:
                 json.dump(specs, out_file)
