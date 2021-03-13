@@ -99,9 +99,9 @@ class Main(QMainWindow):
     def _load_specs(self):
         dialog = QFileDialog()
 
-        dir_name = dialog.getOpenFileName(None, 'Load Specifications', self.props.spec_dir, 'Specifications (*.spec)')
+        dir_name = dialog.getOpenFileName(None, 'Load Specifications', self.config.spec_dir, 'Specifications (*.spec)')
         if dir_name[0]:
-            self.props.spec_dir = dir_name[0]
+            self.config.spec_dir = dir_name[0]
 
             with open(dir_name[0], 'r') as in_file:
                 specs = DotDict(json.load(in_file))
@@ -147,9 +147,9 @@ class Main(QMainWindow):
     def _save_specs(self):
         dialog = QFileDialog()
 
-        dir_name = dialog.getSaveFileName(None, 'Save Specifications', self.props.spec_dir, 'Specifications (*.spec)')
+        dir_name = dialog.getSaveFileName(None, 'Save Specifications', self.config.spec_dir, 'Specifications (*.spec)')
         if dir_name[0]:
-            self.props.spec_dir = dir_name[0]
+            self.config.spec_dir = dir_name[0]
 
             specs = DotDict()
             for child in self.findChildren(QLineEdit):
