@@ -100,7 +100,7 @@ class Main(QMainWindow):
         dialog = QFileDialog()
 
         dir_name = dialog.getOpenFileName(None, 'Load Specifications', self.props.spec_dir, 'Specifications (*.spec)')
-        if dir_name:
+        if dir_name[0]:
             self.props.spec_dir = dir_name[0]
 
             with open(dir_name[0], 'r') as in_file:
@@ -148,7 +148,7 @@ class Main(QMainWindow):
         dialog = QFileDialog()
 
         dir_name = dialog.getSaveFileName(None, 'Save Specifications', self.props.spec_dir, 'Specifications (*.spec)')
-        if dir_name:
+        if dir_name[0]:
             self.props.spec_dir = dir_name[0]
 
             specs = DotDict()
