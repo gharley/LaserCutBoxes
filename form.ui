@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>622</width>
+    <width>634</width>
     <height>711</height>
    </rect>
   </property>
@@ -612,7 +612,7 @@ QToolTip{
         <item row="7" column="0">
          <widget class="QLabel" name="label_11">
           <property name="text">
-           <string>Edge tab width:</string>
+           <string>Height tab width:</string>
           </property>
           <property name="scaledContents">
            <bool>false</bool>
@@ -625,7 +625,7 @@ QToolTip{
         <item row="7" column="1">
          <widget class="QLineEdit" name="edgeTabWidth">
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specifies the width of tabs along the edges. If set to 0, uses &lt;span style=&quot; font-style:italic;&quot;&gt;side/end tab width&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specifies the width of tabs along the height (edges). If set to 0, uses &lt;span style=&quot; font-style:italic;&quot;&gt;side/end tab width&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string>0</string>
@@ -730,7 +730,7 @@ QToolTip{
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>622</width>
+     <width>634</width>
      <height>25</height>
     </rect>
    </property>

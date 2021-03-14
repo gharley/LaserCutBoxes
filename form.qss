@@ -36,10 +36,11 @@ QGraphicsView{
 }
 
 QToolTip{
-	min-width: 15em;
-	max-width: 15em;
-	height: auto;
+	min-width: 20em;
+	max-width: 20em;
+	min-height: 4em;
+	max-height: 4em;
     border: 2px solid black;
-    padding: 5px;
+    padding: 2px;
 	background-color: #eeee44;
 }

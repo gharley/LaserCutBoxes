@@ -38,6 +38,7 @@ class Main(QMainWindow):
 
         self._load_config()
         self._load_ui()
+        self._build_geometry()
 
     def closeEvent(self, event) -> None:
         with open('config.json', 'w') as out_file:
