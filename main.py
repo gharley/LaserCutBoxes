@@ -3,7 +3,7 @@ import json
 import sys, os
 
 from PyQt5 import uic
-from PyQt5.QtCore import QFile, Qt
+from PyQt5.QtCore import QFile, Qt, QIODevice
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QComboBox, QLineEdit, QCheckBox, QFileDialog
 
 from BasicBox import Box
@@ -66,6 +66,13 @@ class Main(QMainWindow):
         ui_file.close()
 
         self.show()
+
+        style_sheet = QFile(':resources/form.qss')
+        if style_sheet.exists():
+            style_sheet.open(QFile.ReadOnly)
+            style = str(style_sheet.readAll(), 'utf-8')
+            self.setStyleSheet(style)
+            style_sheet.close()
 
         self.scnSide = SVGScene(self.imgSide)
         self.scnEnd = SVGScene(self.imgEnd)

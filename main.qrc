@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="resources">
     <file>form.ui</file>
+    <file>form.qss</file>
   </qresource>
 </RCC>
