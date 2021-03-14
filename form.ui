@@ -26,8 +26,8 @@
 }
 
 QLabel {
-    max-width: 8em;
-	min-width: 8em;
+    max-width: 8.5em;
+	min-width: 8.5em;
 }
 
 #lblDim, #lblSpec, #lblMM {
@@ -55,6 +55,10 @@ QLabel::lblType{
 QGraphicsView{
 	min-width: 10em;
 	min-height: 5em;
+}
+
+QToolTip{
+	min-width: 30em;
 }
 </string>
   </property>

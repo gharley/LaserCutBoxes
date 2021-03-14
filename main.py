@@ -83,6 +83,9 @@ class Main(QMainWindow):
     def _build_geometry(self):
         self._init_properties()
         box = self.box = Box(self.props)
+        self.scnSide.clear()
+        self.scnEnd.clear()
+        self.scnBottom.clear()
 
         if self.chkSide.isChecked():
             box.build_long_side()
@@ -117,7 +120,7 @@ class Main(QMainWindow):
                 else:
                     widget.setText(value)
 
-            self.update()
+            self._build_geometry()
 
     def _save_drawings(self):
         dialog = QFileDialog()
