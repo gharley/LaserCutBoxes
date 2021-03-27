@@ -182,11 +182,11 @@ class Box:
         return tabs
 
     def draw_end_slots(self):
-        start = self.vector(self.props.endGap, -(self.props.lidThickness + self.props.bottomThickness))
+        start = self.vector(self.props.endGap, -self.props.lidThickness)
         return self._draw_slots(self.props.numTabsDepth, self.props.endGap, start)
 
     def draw_side_slots(self):
-        start = self.vector(self.props.sideGap, -(self.props.lidThickness + self.props.bottomThickness))
+        start = self.vector(self.props.sideGap, -self.props.lidThickness)
         return self._draw_slots(self.props.numTabsWidth, self.props.sideGap, start)
 
     def draw_edge_tabs(self, face, direction, is_inset, length, start):

@@ -4,6 +4,7 @@ import sys, os
 
 from PyQt5 import uic
 from PyQt5.QtCore import QFile, Qt, QIODevice
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QComboBox, QLineEdit, QCheckBox, QFileDialog
 
 from BasicBox import Box
@@ -74,6 +75,8 @@ class Main(QMainWindow):
             style = str(style_sheet.readAll(), 'utf-8')
             self.setStyleSheet(style)
             style_sheet.close()
+
+        self.setWindowIcon(QIcon(':images/end_all.svg'))
 
         self.scnSide = SVGScene(self.imgSide)
         self.scnEnd = SVGScene(self.imgEnd)

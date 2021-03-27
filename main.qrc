@@ -3,4 +3,7 @@
     <file>form.ui</file>
     <file>form.qss</file>
   </qresource>
+  <qresource>
+    <file>images/end_all.svg</file>
+  </qresource>
 </RCC>
