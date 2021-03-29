@@ -16,7 +16,8 @@ to be sure the tabs will fit together. (HINT: round up a bit to be sure there's 
 
 ### Installation
 Just download the appropriate file from the dist folder, .EXE for windows or the other for Linux. 
-If running on Linux, be sure to give the file "execute" permissions.
+If running on Linux, be sure to give the file "execute" permissions. The app may take a while to
+open on Windows.
 
 ### Build
 If you wish to build/modify the app, download all the source files and run lc_box.py with Python. 

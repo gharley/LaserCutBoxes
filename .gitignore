@@ -69,7 +69,6 @@ Thumbs.db
 # Binaries
 # --------
 *.dll
-*.exe
 
 # JetBrains files
 \.idea/
@@ -77,5 +76,5 @@ Thumbs.db
 *.user
 build/
 *.spec
-dist/
+dist/*.json
 config.json
