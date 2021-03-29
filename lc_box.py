@@ -12,7 +12,7 @@ from SVGCreator import SVGCreator
 from SVGScene import SVGScene
 from common import DotDict, BoxType
 
-import main_rc
+import lc_box_rc
 
 # Handle high res monitors
 if hasattr(Qt, 'AA_EnableHighDpiScaling'):

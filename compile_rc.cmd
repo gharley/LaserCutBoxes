@@ -1,1 +1,1 @@
-pyrcc5 -o main_rc.py main.qrc
+pyrcc5 -o lc_box_rc.py lc_box.qrc
