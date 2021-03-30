@@ -3,7 +3,7 @@
 
 This little app is for designing laser cut boxes for different material thicknesses.
 I have found a number of cool box designs online but invariably they were designed for a different thickness
-of material than I have on hand and resizing is non-trivial. So I wrote these macros to allow me to create a box
+of material than I have on hand and resizing is non-trivial. So I wrote this app to allow me to create a box
 with any material thickness.
 
 The app creates a basic "tabbed" box with optional slots to allow for an inset lid. Simply 
@@ -21,7 +21,7 @@ open on Windows.
 
 ### Build
 If you wish to build/modify the app, download all the source files and run lc_box.py with Python. 
-You will need to have Python 3.x installed with lxml and numpy as well as QT 5.x.
+You will need to have Python 3.x installed with PyQt5, lxml and numpy as well as QT 5.x.
 
 ### Have Fun!!
 Once you have exported files you can import them into an app like LightBurn or RDWorks and then
