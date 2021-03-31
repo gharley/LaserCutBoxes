@@ -3,7 +3,7 @@ import json
 import sys, os
 
 from PyQt5 import uic
-from PyQt5.QtCore import QFile, Qt, QIODevice
+from PyQt5.QtCore import QFile, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QComboBox, QLineEdit, QCheckBox, QFileDialog
 
@@ -45,6 +45,18 @@ class Main(QMainWindow):
         with open('config.json', 'w') as out_file:
             json.dump(self.config, out_file)
 
+    def _init_connections(self):
+        self.cboBoxType.currentIndexChanged.connect(self._set_box_type)
+        self.btnGenerate.clicked.connect(self._build_geometry)
+        self.actionGenerate_Drawings.triggered.connect(self._build_geometry)
+        self.actionSave_Drawings.triggered.connect(self._save_drawings)
+        self.actionLoad_Specifications.triggered.connect(self._load_specs)
+        self.actionSave_Specifications.triggered.connect(self._save_specs)
+        self.actionExit.triggered.connect(self.close)
+
+        for obj in self.findChildren(QLineEdit):
+            obj.editingFinished.connect(self._set_control_states)
+
     def _init_properties(self):
         for obj in self.findChildren(QLabel):
             buddy = obj.buddy()
@@ -82,13 +94,11 @@ class Main(QMainWindow):
         self.scnEnd = SVGScene(self.imgEnd)
         self.scnBottom = SVGScene(self.imgBottom)
 
-        self.cboBoxType.currentIndexChanged.connect(self._set_box_type)
-        self.btnGenerate.clicked.connect(self._build_geometry)
-        self.actionGenerate_Drawings.triggered.connect(self._build_geometry)
-        self.actionSave_Drawings.triggered.connect(self._save_drawings)
-        self.actionLoad_Specifications.triggered.connect(self._load_specs)
-        self.actionSave_Specifications.triggered.connect(self._save_specs)
-        self.actionExit.triggered.connect(self.close)
+        self._init_connections()
+
+    def _set_control_states(self, widget):
+        if not widget.text().isdigit():
+            widget.setText('0')
 
     # Slots and Actions
     def _build_geometry(self):

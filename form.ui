@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>Main</class>
  <widget class="QMainWindow" name="Main">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>698</width>
+    <height>729</height>
+   </rect>
+  </property>
   <property name="font">
    <font>
     <family>verdana</family>
@@ -722,7 +730,7 @@ QToolTip{
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>634</width>
+     <width>698</width>
      <height>25</height>
     </rect>
    </property>
