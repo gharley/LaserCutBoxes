@@ -4,7 +4,7 @@ import sys, os
 
 from PyQt5 import uic
 from PyQt5.QtCore import QFile, Qt
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QIntValidator, QDoubleValidator
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QComboBox, QLineEdit, QCheckBox, QFileDialog
 
 from BasicBox import Box
@@ -55,7 +55,10 @@ class Main(QMainWindow):
         self.actionExit.triggered.connect(self.close)
 
         for obj in self.findChildren(QLineEdit):
-            obj.editingFinished.connect(self._set_control_states)
+            if obj.objectName().startswith('num'):
+                obj.setValidator(QIntValidator())
+            else:
+                obj.setValidator(QDoubleValidator(0.00, 99999.99, 2))
 
     def _init_properties(self):
         for obj in self.findChildren(QLabel):
@@ -79,6 +82,8 @@ class Main(QMainWindow):
         uic.loadUi(ui_file, self)
         ui_file.close()
 
+        self._init_connections()
+
         self.show()
 
         style_sheet = QFile(':resources/form.qss')
@@ -93,12 +98,6 @@ class Main(QMainWindow):
         self.scnSide = SVGScene(self.imgSide)
         self.scnEnd = SVGScene(self.imgEnd)
         self.scnBottom = SVGScene(self.imgBottom)
-
-        self._init_connections()
-
-    def _set_control_states(self, widget):
-        if not widget.text().isdigit():
-            widget.setText('0')
 
     # Slots and Actions
     def _build_geometry(self):
