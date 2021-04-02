@@ -27,7 +27,6 @@ class Main(QMainWindow):
         super(Main, self).__init__()
 
         self.config = DotDict()
-        self.props = DotDict()
         self.config.export_dir = ''
         self.config.spec_dir = ''
 
@@ -61,6 +60,7 @@ class Main(QMainWindow):
                 obj.setValidator(QDoubleValidator(0.00, 99999.99, 2))
 
     def _init_properties(self):
+        self.props = DotDict()
         for obj in self.findChildren(QLabel):
             buddy = obj.buddy()
             if buddy is not None:
@@ -109,15 +109,15 @@ class Main(QMainWindow):
 
         if self.chkSide.isChecked():
             box.build_long_side()
-            self.scnSide.add_lines(box.side)
+            self.scnSide.add_lines(box.outer_width, box.outer_height, box.side)
 
         if self.chkEnd.isChecked():
             box.build_short_side()
-            self.scnEnd.add_lines(box.end)
+            self.scnEnd.add_lines(box.depth, box.outer_height, box.end)
 
         if self.chkBottom.isChecked():
             box.build_bottom()
-            self.scnBottom.add_lines(box.bottom)
+            self.scnBottom.add_lines(box.outer_width, box.outer_depth, box.bottom)
 
     def _load_specs(self):
         dialog = QFileDialog()

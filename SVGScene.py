@@ -1,8 +1,10 @@
 from threading import Timer
 
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
-from PyQt5.QtCore import QObject, QEvent
+from PyQt5.QtCore import QObject, QEvent, QRectF
 from PyQt5.QtGui import QPen, QColor, QTransform
+
+_PADDING = 5
 
 
 class SVGScene(QGraphicsScene):
@@ -13,8 +15,9 @@ class SVGScene(QGraphicsScene):
         view.setScene(self)
         view.installEventFilter(self)
 
-    def add_lines(self, lines):
+    def add_lines(self, width, height, lines):
         self.clear()
+        self.setSceneRect(QRectF(-_PADDING, -height, width + _PADDING, height))
         pen = QPen(QColor(0))
         pen.setWidth(0)
 
@@ -31,7 +34,7 @@ class SVGScene(QGraphicsScene):
         return False
 
     def scale(self):
-        scene_rect = self.view.sceneRect()
+        scene_rect = self.sceneRect()
         if scene_rect.height() != 0:
             self.view.setTransform(QTransform())
             view_rect = self.view.rect()
