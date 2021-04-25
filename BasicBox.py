@@ -5,11 +5,9 @@ __date__ = "12/31/20"
 
 __Comment__ = "This module creates a sketch of a laser cut box which can then be saved to an SVG file."
 
-import numpy as np
-
 from enum import Enum
 
-from common import DotDict, BoxType
+from common import DotDict, BoxType, vector, get_vectors
 
 # Indexes for geoid
 START = 1
@@ -123,7 +121,7 @@ class Box:
 
         outer_height = self.outer_height
 
-        lower_left, upper_left, lower_right, upper_right = self.get_vectors(outer_width, outer_height)
+        lower_left, upper_left, lower_right, upper_right = get_vectors(outer_width, outer_height)
 
         side = self._side if face is Face.SIDE else self._end
 
@@ -145,7 +143,7 @@ class Box:
         width = self.props.width
         depth = self.props.depth
 
-        lower_left, upper_left, lower_right, upper_right = self.get_vectors(width, depth)
+        lower_left, upper_left, lower_right, upper_right = get_vectors(width, depth)
 
         self._bottom.extend(self.draw_edge_tabs(Face.BOTTOM, Direction.WEST, False, depth, lower_left))
         self._bottom.extend(self.draw_edge_tabs(Face.BOTTOM, Direction.NORTH, False, width, upper_left))
@@ -161,7 +159,7 @@ class Box:
         self._build_side(Face.END, self.draw_end_slots)
 
     def draw_slot(self, width, height, offset):
-        lower_left, upper_left, lower_right, upper_right = self.get_vectors(width, height)
+        lower_left, upper_left, lower_right, upper_right = get_vectors(width, height)
 
         top = (upper_left + offset, upper_right + offset)
         right = (upper_right + offset, lower_right + offset)
@@ -176,17 +174,17 @@ class Box:
         bottom_thickness = self.props.bottomThickness
 
         for idx in range(0, num_tabs):
-            tab = self.draw_slot(tab_width, bottom_thickness, start + self.vector((tab_width + gap) * idx, 0))
+            tab = self.draw_slot(tab_width, bottom_thickness, start + vector((tab_width + gap) * idx, 0))
             tabs.extend(tab)
 
         return tabs
 
     def draw_end_slots(self):
-        start = self.vector(self.props.endGap, -self.props.lidThickness)
+        start = vector(self.props.endGap, -self.props.lidThickness)
         return self._draw_slots(self.props.numTabsDepth, self.props.endGap, start)
 
     def draw_side_slots(self):
-        start = self.vector(self.props.sideGap, -self.props.lidThickness)
+        start = vector(self.props.sideGap, -self.props.lidThickness)
         return self._draw_slots(self.props.numTabsWidth, self.props.sideGap, start)
 
     def draw_edge_tabs(self, face, direction, is_inset, length, start):
@@ -242,21 +240,21 @@ class Box:
             config.tabWidth = -config.tabWidth
 
         if is_vertical:
-            first_offset = last_offset = self.vector(0, config.longOffset)
-            gap_length = self.vector(0, config.gap)
-            tab_length = self.vector(0, config.tabWidth)
-            thickness_length = self.vector(config.thickness, 0)
+            first_offset = last_offset = vector(0, config.longOffset)
+            gap_length = vector(0, config.gap)
+            tab_length = vector(0, config.tabWidth)
+            thickness_length = vector(config.thickness, 0)
         else:
             if face is Face.BOTTOM:
-                first_offset = last_offset = self.vector(config.longOffset, 0)
+                first_offset = last_offset = vector(config.longOffset, 0)
             else:
-                offset = self.vector(self.props.thickness / 2.0, 0)
-                first_offset = self.vector(config.longOffset, 0) - offset
-                last_offset = self.vector(config.longOffset, 0) + offset
+                offset = vector(self.props.thickness / 2.0, 0)
+                first_offset = vector(config.longOffset, 0) - offset
+                last_offset = vector(config.longOffset, 0) + offset
 
-            gap_length = self.vector(config.gap, 0)
-            tab_length = self.vector(config.tabWidth, 0)
-            thickness_length = self.vector(0, config.thickness)
+            gap_length = vector(config.gap, 0)
+            tab_length = vector(config.tabWidth, 0)
+            thickness_length = vector(0, config.thickness)
 
         line = (0, 0)  # something's wrong if this value gets used
 
@@ -273,17 +271,3 @@ class Box:
         add_line(line[1], last_offset)
 
         return lines
-
-    # Helper methods
-    @staticmethod
-    def get_vectors(width, height):
-        lower_left = Box.vector(0, -height)
-        upper_left = Box.vector(0, 0)
-        lower_right = Box.vector(width, -height)
-        upper_right = Box.vector(width, 0)
-
-        return lower_left, upper_left, lower_right, upper_right
-
-    @staticmethod
-    def vector(x, y):
-        return np.array([float(x), float(y)])
