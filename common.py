@@ -18,6 +18,19 @@ class BoxType(Enum):
 
 
 # Helper methods
+def add_line(start_point, end_offset, lines):
+    end_point = start_point + end_offset
+    if abs(end_point[0]) < 0.0001: end_point[0] = 0.0
+    if abs(end_point[1]) < 0.0001: end_point[1] = 0.0
+
+    new_line = (start_point, end_point)
+
+    lines.append(new_line)
+    index = len(lines) - 1
+
+    return index, new_line
+
+
 def get_vectors(width, height):
     lower_left = vector(0, -height)
     upper_left = vector(0, 0)

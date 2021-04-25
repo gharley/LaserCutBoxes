@@ -7,7 +7,7 @@ __Comment__ = "This module creates a sketch of a laser cut box which can then be
 
 from enum import Enum
 
-from common import DotDict, BoxType, vector, get_vectors
+from common import DotDict, BoxType, add_line, vector, get_vectors
 
 # Indexes for geoid
 START = 1
@@ -194,17 +194,6 @@ class Box:
 
         lines = []
 
-        def add_line(start_point, end_offset):
-            end_point = start_point + end_offset
-            if abs(end_point[0]) < 0.0001: end_point[0] = 0.0
-            if abs(end_point[1]) < 0.0001: end_point[1] = 0.0
-
-            new_line = (start_point, end_point)
-
-            lines.append(new_line)
-
-            return new_line
-
         if is_vertical:
             if face is Face.BOTTOM:
                 config.numTabs = self.props.numTabsDepth
@@ -260,14 +249,14 @@ class Box:
 
         for idx in range(0, int(config.numTabs)):
             if idx == 0:
-                line = add_line(start, first_offset)
+                line = add_line(start, first_offset, lines)
             else:
-                line = add_line(line[1], gap_length)
+                line = add_line(line[1], gap_length, lines)
 
-            line = add_line(line[1], thickness_length)
-            line = add_line(line[1], tab_length)
-            line = add_line(line[1], -thickness_length)
+            _, line = add_line(line[1], thickness_length, lines)
+            _, line = add_line(line[1], tab_length, lines)
+            _, line = add_line(line[1], -thickness_length, lines)
 
-        add_line(line[1], last_offset)
+        add_line(line[1], last_offset, lines)
 
         return lines

@@ -9,7 +9,7 @@ from numpy import pi
 
 from enum import Enum
 
-from common import BoxType, vector, get_vectors
+from common import BoxType, add_line, vector, get_vectors
 
 # Indexes for geoid
 START = 1
@@ -74,25 +74,14 @@ class Hinge:
     def start_point(self, value):
         self._start_point = value
 
-    def add_line(self, start_point, end_offset, lines):
-        end_point = start_point + end_offset
-        if abs(end_point[0]) < 0.0001: end_point[0] = 0.0
-        if abs(end_point[1]) < 0.0001: end_point[1] = 0.0
-
-        new_line = (start_point, end_point)
-
-        lines.append(new_line)
-
-        return new_line
-
     def add_short_lines(self, short_length, gap_length_v, gap_length_h):
         first_time = self.short_line_index == -1
         start_point = self.start_point if len(self._outer_lines) == 0 else self._outer_lines[-1][1]
 
-        line = self.add_line(start_point, short_length, self._outer_lines)
-        line = self.add_line(line[1], gap_length_v, self._outer_lines)
-        line = self.add_line(line[1], short_length, self._outer_lines)
-        line = self.add_line(start_point, gap_length_h, self._outer_lines)
+        line = add_line(start_point, short_length, self._outer_lines)
+        line = add_line(line[1], gap_length_v, self._outer_lines)
+        line = add_line(line[1], short_length, self._outer_lines)
+        line = add_line(start_point, gap_length_h, self._outer_lines)
 
     def draw(self):
         hinge_length = vector(self.length(), 0)
@@ -110,12 +99,12 @@ class Hinge:
             self.add_short_lines(long_length / 2, gap_length_v, gap_length_h)
 
             long_start = self.sketch.Geometry[self._outer_lines[-1]].EndPoint - (gap_length_h / 2) + (gap_length_v / 2)
-            line_index, inner_line = self.add_line(long_start, long_length, self._inner_lines)
+            line_index, inner_line = add_line(long_start, long_length, self._inner_lines)
 
             if idx == 0:
                 self.long_line_index = line_index
 
-            line_index, inner_line = self.add_line(long_start, gap_length_h, self._inner_lines, (self._inner_lines[-1], START))
+            line_index, inner_line = add_line(long_start, gap_length_h, self._inner_lines, (self._inner_lines[-1], START))
             self.sketch.toggleConstruction(line_index)
 
         self.add_short_lines(long_length / 2, gap_length_v, gap_length_h)
