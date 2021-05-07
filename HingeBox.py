@@ -9,7 +9,7 @@ from numpy import pi
 
 from enum import Enum
 
-from common import BoxType, add_line, vector, get_vectors
+from common import *
 
 # Indexes for geoid
 START = 1
@@ -24,23 +24,13 @@ BOTTOM = 2
 LEFT = 3
 
 
-# Directional enums for drawing edges
-class Direction(Enum):
-    NS = 1
-    EW = 2
-    SN = 3
-    WE = 4
-
-
 class Hinge:
     num_segments = 6
     radius = 15
     segment_width = 3
     thickness = 3
 
-    def __init__(self, sketch, height, start_point=None, constrain=False):
-        self.sketch = sketch
-        self.constrain = constrain
+    def __init__(self, height, start_point=None):
         self.height = height
 
         if start_point is None:
@@ -75,13 +65,12 @@ class Hinge:
         self._start_point = value
 
     def add_short_lines(self, short_length, gap_length_v, gap_length_h):
-        first_time = self.short_line_index == -1
         start_point = self.start_point if len(self._outer_lines) == 0 else self._outer_lines[-1][1]
 
-        line = add_line(start_point, short_length, self._outer_lines)
-        line = add_line(line[1], gap_length_v, self._outer_lines)
-        line = add_line(line[1], short_length, self._outer_lines)
-        line = add_line(start_point, gap_length_h, self._outer_lines)
+        _, line = add_line(start_point, short_length, self._outer_lines)
+        _, line = add_line(line[1], gap_length_v, self._outer_lines)
+        add_line(line[1], short_length, self._outer_lines)
+        add_line(start_point, gap_length_h, self._outer_lines)
 
     def draw(self):
         hinge_length = vector(self.length(), 0)
@@ -90,22 +79,19 @@ class Hinge:
         gap_length_v = vector(0, self.thickness * 2)
         gap_length_h = vector(self.segment_width, 0)
 
-        self.bottom_line_index = self.sketch.addGeometry(Part.LineSegment(self.start_point, self.start_point + hinge_length), False)
-
-        self.top_line_index = self.sketch.addGeometry(
-            Part.LineSegment(self.start_point + hinge_height, self.start_point + hinge_height + hinge_length), False)
+        # self.bottom_line_index = self.sketch.addGeometry(Part.LineSegment(self.start_point, self.start_point + hinge_length), False)
+        #
+        # self.top_line_index = self.sketch.addGeometry(
+        #     Part.LineSegment(self.start_point + hinge_height, self.start_point + hinge_height + hinge_length), False)
 
         for idx in range(0, self.num_segments):
             self.add_short_lines(long_length / 2, gap_length_v, gap_length_h)
 
-            long_start = self.sketch.Geometry[self._outer_lines[-1]].EndPoint - (gap_length_h / 2) + (gap_length_v / 2)
+            long_start =self._outer_lines[-1][1][1] - (gap_length_h / 2) + (gap_length_v / 2)
             line_index, inner_line = add_line(long_start, long_length, self._inner_lines)
 
             if idx == 0:
                 self.long_line_index = line_index
-
-            line_index, inner_line = add_line(long_start, gap_length_h, self._inner_lines, (self._inner_lines[-1], START))
-            self.sketch.toggleConstruction(line_index)
 
         self.add_short_lines(long_length / 2, gap_length_v, gap_length_h)
 
@@ -151,7 +137,6 @@ class Box:
 
     def build_side(self):
         props = self.props
-        sketch = self._add_sketch('BoxSide')
 
         width = float(props.width - props.adjust)
         depth = float(props.depth - props.adjust)
@@ -172,17 +157,17 @@ class Box:
             if self.box_type == BoxType.SLOTS:
                 line2 = [(bottom_start, bottom_start + length)]
             else:
-                line2 = self.draw_edge_tabs(num_tabs, length.x, Direction.WE, False, bottom_start)
+                line2 = self.draw_edge_tabs(num_tabs, length.x, Direction.NORTH, False, bottom_start)
 
             return line1, line2
 
-        def draw_side(top_start, bottom_start, length, num_tabs=1, old_hinge=None):
-            top_line, bottom_line = draw_lines(top_start, bottom_start, length, num_tabs)
+        def draw_side(top_start, bottom_start, length, num_tabs=1):
+            draw_lines(top_start, bottom_start, length, num_tabs)
 
             if self.box_type != BoxType.TABS:
-                slots = self.draw_slots(sketch, num_tabs, length.x, top_start)
+                draw_slots(num_tabs, length.x, top_start, self.props)
 
-            new_hinge = Hinge(sketch, actual_height, bottom_start + length)
+            new_hinge = Hinge(actual_height, bottom_start + length)
             new_hinge.draw()
 
             top = sketch.Geometry[new_hinge.top_line_index].EndPoint
@@ -200,17 +185,16 @@ class Box:
         hinge, hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, short_length, props.numTabsDepth, hinge)
         hinge, hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, long_length, props.numTabsWidth, hinge)
 
-        last_top, last_bottom = draw_lines(hinge_top, hinge_bottom, short_length / 2.0)
+        draw_lines(hinge_top, hinge_bottom, short_length / 2.0)
 
-        self.draw_dovetails(sketch, lower_left, upper_left)
-        self.draw_dovetails(sketch, hinge_bottom + short_length / 2, hinge_top + short_length / 2.0)
+        self.draw_dovetails(lower_left, upper_left)
+        self.draw_dovetails(hinge_bottom + short_length / 2, hinge_top + short_length / 2.0)
 
         if self.box_type != BoxType.TABS:
-            self.draw_slots(sketch, 1, short_length.x / 2, hinge_top)
+            self.draw_slots(1, short_length.x / 2, hinge_top, self.props)
 
     def build_bottom(self):
         props = self.props
-        sketch = self._add_sketch('BoxBottom')
 
         lower_left, upper_left, lower_right, upper_right = get_vectors(props.width, props.depth)
 
@@ -221,10 +205,10 @@ class Box:
         offset_v = vector(0, radius)
         last_gap = ((props.depth - props.adjust) / 2.0 - props.tabWidth)
 
-        box = [self.draw_edge_tabs(sketch, props.numTabsWidth, width, Direction.WE, True, upper_left + offset_h),
-               self.draw_edge_tabs(sketch, props.numTabsDepth, depth, Direction.NS, True, lower_right + offset_v),
-               self.draw_edge_tabs(sketch, props.numTabsWidth, width, Direction.EW, True, lower_left + offset_h),
-               self.draw_edge_tabs(sketch, 2, depth, Direction.SN, True, lower_left + offset_v, last_gap)]
+        box = [self.draw_edge_tabs(props.numTabsWidth, width, Direction.NORTH, True, upper_left + offset_h, self.props),
+               self.draw_edge_tabs(props.numTabsDepth, depth, Direction.EAST, True, lower_right + offset_v, self.props),
+               self.draw_edge_tabs(props.numTabsWidth, width, Direction.SOUTH, True, lower_left + offset_h, self.props),
+               self.draw_edge_tabs(2, depth, Direction.WEST, True, lower_left + offset_v, last_gap), self.props]
 
         arc_stop = sketch.Geometry[box[LEFT][0]].StartPoint.y
         arc_start = sketch.Geometry[box[BOTTOM][0]].StartPoint.x
@@ -246,7 +230,7 @@ class Box:
         circle = Part.Circle(vector(arc_start, arc_stop), vector(0, 0, 1), radius)
         br = sketch.addGeometry(Part.ArcOfCircle(circle, pi * 1.5, 0), False)
 
-    def draw_dovetails(self, sketch, start_point, end_point):
+    def draw_dovetails(self, start_point, end_point):
         num_tabs = self.props.numTabsHeight
         tab_width = self.props.tabWidth
         height = end_point.y - start_point.y
@@ -324,7 +308,7 @@ class Box:
 
     def draw_edge_tabs(self, sketch, num_tabs, length, direction, is_bottom, start, gap=None):
         props = self.props
-        is_vertical = direction is Direction.NS or direction is Direction.SN
+        is_vertical = direction is Direction.EAST or direction is Direction.WEST
 
         if gap is None:
             gap = props.gapV if is_vertical else props.gapH
@@ -351,7 +335,7 @@ class Box:
 
             thickness = props.thickness
 
-            if direction == Direction.SN:
+            if direction == Direction.WEST:
                 thickness = -thickness
 
             gap_length = vector(0, gap)
@@ -365,7 +349,7 @@ class Box:
             else:
                 thickness = props.bottomThickness
 
-            if (is_bottom and direction == Direction.WE) or (not is_bottom and direction == Direction.EW):
+            if (is_bottom and direction == Direction.NORTH) or (not is_bottom and direction == Direction.SOUTH):
                 thickness = -thickness
 
             gap_length = vector(gap, 0)
@@ -427,46 +411,8 @@ class Box:
         line_index, line = add_line(line.EndPoint, offset_length, line_index)
 
         if self.constrain:
-            index = line_index if direction == Direction.NS or direction == Direction.EW else offset_line_index
+            index = line_index if direction == Direction.EAST or direction == Direction.SOUTH else offset_line_index
             constraint_type = 'DistanceY' if is_vertical else 'DistanceX'
             sketch.addConstraint(Sketcher.Constraint(constraint_type, index, offset))
 
         return lines
-
-    @staticmethod
-    def _add_sketch(sketch_name):
-        body = App.ActiveDocument.addObject('PartDesign::Body', sketch_name)
-        sketch = App.ActiveDocument.addObject('Sketcher::SketchObject', sketch_name + 'Sketch')
-        body.addObject(sketch)
-
-        return sketch
-
-    @staticmethod
-    def _constrain_sides(sketch, box):
-        sketch.addConstraint(Sketcher.Constraint('Coincident', box[LEFT][0], START, box[TOP][0], START))
-        sketch.addConstraint(Sketcher.Constraint('Coincident', box[TOP][-1], END, box[RIGHT][-1], END))
-        sketch.addConstraint(Sketcher.Constraint('Coincident', box[RIGHT][-1], END, box[BOTTOM][-1], END))
-        sketch.addConstraint(Sketcher.Constraint('Coincident', box[BOTTOM][0], START, box[LEFT][0], START))
-
-    @staticmethod
-    def get_line(sketch, index):
-        return sketch.Geometry[index]
-
-    @staticmethod
-    def get_line_length(sketch, line_array, is_vertical):
-        start_line = sketch.Geometry[line_array[0]]
-        end_line = sketch.Geometry[line_array[-1]]
-
-        if is_vertical:
-            length = end_line.EndPoint.y - start_line.StartPoint.y
-        else:
-            length = end_line.EndPoint.x - start_line.StartPoint.x
-
-        return length
-
-    @staticmethod
-    def log(message):
-        App.Console.PrintMessage(str(message) + '\n')
-
-
-Box()
