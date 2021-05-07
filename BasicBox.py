@@ -5,9 +5,7 @@ __date__ = "12/31/20"
 
 __Comment__ = "This module creates a sketch of a laser cut box which can then be saved to an SVG file."
 
-from enum import Enum
-
-from common import DotDict, BoxType, add_line, vector, get_vectors
+from common import *
 
 # Indexes for geoid
 START = 1
@@ -19,21 +17,6 @@ TOP = 0
 RIGHT = 1
 BOTTOM = 2
 LEFT = 3
-
-
-# Directional enums for drawing edges
-class Direction(Enum):
-    EAST = 1
-    SOUTH = 2
-    WEST = 3
-    NORTH = 4
-
-
-# Face enums for drawing edges
-class Face(Enum):
-    SIDE = 1
-    END = 2
-    BOTTOM = 3
 
 
 class Box:
@@ -126,14 +109,14 @@ class Box:
         side = self._side if face is Face.SIDE else self._end
 
         side.append((upper_left, upper_right))
-        side.extend(self.draw_edge_tabs(face, Direction.EAST, True, outer_height, upper_right))
+        side.extend(draw_edge_tabs(face, Direction.EAST, True, outer_height, upper_right, self.props))
 
         if self.props.box_type != BoxType.SLOTS:
-            side.extend(self.draw_edge_tabs(face, Direction.SOUTH, True, outer_width, lower_right))
+            side.extend(draw_edge_tabs(face, Direction.SOUTH, True, outer_width, lower_right, self.props))
         else:
             side.append((lower_right, lower_left))
 
-        side.extend(self.draw_edge_tabs(face, Direction.WEST, False, outer_height, lower_left))
+        side.extend(draw_edge_tabs(face, Direction.WEST, False, outer_height, lower_left, self.props))
 
         if self.props.box_type != BoxType.TABS:
             side.extend(tab_func())
@@ -145,10 +128,10 @@ class Box:
 
         lower_left, upper_left, lower_right, upper_right = get_vectors(width, depth)
 
-        self._bottom.extend(self.draw_edge_tabs(Face.BOTTOM, Direction.WEST, False, depth, lower_left))
-        self._bottom.extend(self.draw_edge_tabs(Face.BOTTOM, Direction.NORTH, False, width, upper_left))
-        self._bottom.extend(self.draw_edge_tabs(Face.BOTTOM, Direction.EAST, False, depth, upper_right))
-        self._bottom.extend(self.draw_edge_tabs(Face.BOTTOM, Direction.SOUTH, False, width, lower_right))
+        self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.WEST, False, depth, lower_left, self.props))
+        self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.NORTH, False, width, upper_left, self.props))
+        self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.EAST, False, depth, upper_right, self.props))
+        self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.SOUTH, False, width, lower_right, self.props))
 
     def build_long_side(self):
         self._side = []
@@ -158,105 +141,10 @@ class Box:
         self._end = []
         self._build_side(Face.END, self.draw_end_slots)
 
-    def draw_slot(self, width, height, offset):
-        lower_left, upper_left, lower_right, upper_right = get_vectors(width, height)
-
-        top = (upper_left + offset, upper_right + offset)
-        right = (upper_right + offset, lower_right + offset)
-        bottom = (lower_right + offset, lower_left + offset)
-        left = (lower_left + offset, upper_left + offset)
-
-        return [top, right, bottom, left]
-
-    def _draw_slots(self, num_tabs, gap, start):
-        tabs = []
-        tab_width = self.props.tabWidth
-        bottom_thickness = self.props.bottomThickness
-
-        for idx in range(0, num_tabs):
-            tab = self.draw_slot(tab_width, bottom_thickness, start + vector((tab_width + gap) * idx, 0))
-            tabs.extend(tab)
-
-        return tabs
-
     def draw_end_slots(self):
         start = vector(self.props.endGap, -self.props.lidThickness)
-        return self._draw_slots(self.props.numTabsDepth, self.props.endGap, start)
+        return draw_slots(self.props.numTabsDepth, self.props.endGap, start, self.props)
 
     def draw_side_slots(self):
         start = vector(self.props.sideGap, -self.props.lidThickness)
-        return self._draw_slots(self.props.numTabsWidth, self.props.sideGap, start)
-
-    def draw_edge_tabs(self, face, direction, is_inset, length, start):
-        is_vertical = direction is Direction.EAST or direction is Direction.WEST
-        config = DotDict()
-        config.tabWidth = self.props.edgeTabWidth if is_vertical and face is not Face.BOTTOM else self.props.tabWidth
-
-        lines = []
-
-        if is_vertical:
-            if face is Face.BOTTOM:
-                config.numTabs = self.props.numTabsDepth
-                config.gap = self.props.endGap
-            else:
-                config.numTabs = self.props.numTabsHeight
-                config.gap = self.props.heightGap
-
-            config.thickness = self.props.thickness
-
-            if (is_inset and direction == Direction.EAST) or (not is_inset and direction == Direction.WEST):
-                config.thickness = -config.thickness
-        else:
-            if face is Face.SIDE or face is Face.BOTTOM:
-                config.numTabs = self.props.numTabsWidth
-                config.gap = self.props.sideGap
-            else:
-                config.numTabs = self.props.numTabsDepth
-                config.gap = self.props.endGap
-
-            if face is Face.BOTTOM:
-                config.thickness = self.props.thickness
-            else:
-                config.thickness = self.props.bottomThickness
-
-            if (is_inset and direction == Direction.NORTH) or (not is_inset and direction == Direction.SOUTH):
-                config.thickness = -config.thickness
-
-        config.longOffset = (length - config.numTabs * config.tabWidth - config.gap * (config.numTabs - 1)) / 2.0
-        if direction is Direction.EAST or direction is Direction.SOUTH:
-            config.longOffset = -config.longOffset
-            config.gap = -config.gap
-            config.tabWidth = -config.tabWidth
-
-        if is_vertical:
-            first_offset = last_offset = vector(0, config.longOffset)
-            gap_length = vector(0, config.gap)
-            tab_length = vector(0, config.tabWidth)
-            thickness_length = vector(config.thickness, 0)
-        else:
-            if face is Face.BOTTOM:
-                first_offset = last_offset = vector(config.longOffset, 0)
-            else:
-                offset = vector(self.props.thickness / 2.0, 0)
-                first_offset = vector(config.longOffset, 0) - offset
-                last_offset = vector(config.longOffset, 0) + offset
-
-            gap_length = vector(config.gap, 0)
-            tab_length = vector(config.tabWidth, 0)
-            thickness_length = vector(0, config.thickness)
-
-        line = (0, 0)  # something's wrong if this value gets used
-
-        for idx in range(0, int(config.numTabs)):
-            if idx == 0:
-                line = add_line(start, first_offset, lines)
-            else:
-                line = add_line(line[1], gap_length, lines)
-
-            _, line = add_line(line[1], thickness_length, lines)
-            _, line = add_line(line[1], tab_length, lines)
-            _, line = add_line(line[1], -thickness_length, lines)
-
-        add_line(line[1], last_offset, lines)
-
-        return lines
+        return draw_slots(self.props.numTabsWidth, self.props.sideGap, start, self.props)
