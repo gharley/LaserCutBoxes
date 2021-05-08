@@ -45,13 +45,21 @@ class Main(QMainWindow):
             json.dump(self.config, out_file)
 
     def _init_connections(self):
+        def toggle_type():
+            self.loHinge.setEnabled(self.btnHinge.isChecked())
+
         self.cboBoxType.currentIndexChanged.connect(self._set_box_type)
         self.btnGenerate.clicked.connect(self._build_geometry)
+        self.btnBasic.clicked.connect(toggle_type)
+        self.btnHinge.clicked.connect(toggle_type)
+
         self.actionGenerate_Drawings.triggered.connect(self._build_geometry)
         self.actionSave_Drawings.triggered.connect(self._save_drawings)
         self.actionLoad_Specifications.triggered.connect(self._load_specs)
         self.actionSave_Specifications.triggered.connect(self._save_specs)
         self.actionExit.triggered.connect(self.close)
+
+        toggle_type()
 
         for obj in self.findChildren(QLineEdit):
             if obj.objectName().startswith('num'):

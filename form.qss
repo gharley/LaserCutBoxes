@@ -8,7 +8,7 @@ QLabel {
 	min-width: 8.5em;
 }
 
-#lblDim, #lblSpec, #lblMM {
+#lblDim, #lblSpec, #lblMM, #lblHinge {
 	max-width: -1;
 }
 
@@ -36,10 +36,11 @@ QGraphicsView{
 }
 
 QToolTip{
+    height: auto;
 	min-width: 20em;
 	max-width: 20em;
 	min-height: 4em;
-	max-height: 4em;
+	max-height: 5em;
     border: 2px solid black;
     padding: 2px;
 	background-color: #eeee44;
