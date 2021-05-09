@@ -46,7 +46,14 @@ class Main(QMainWindow):
 
     def _init_connections(self):
         def toggle_type():
-            self.loHinge.setEnabled(self.btnHinge.isChecked())
+            if self.btnHinge.isChecked():
+                self.objHinge.show()
+                self.imgEnd.hide()
+                self.chkEnd.hide()
+            else:
+                self.objHinge.hide()
+                self.imgEnd.show()
+                self.chkEnd.show()
 
         self.cboBoxType.currentIndexChanged.connect(self._set_box_type)
         self.btnGenerate.clicked.connect(self._build_geometry)
