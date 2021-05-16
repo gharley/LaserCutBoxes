@@ -7,7 +7,9 @@ from PyQt5.QtCore import QFile, Qt
 from PyQt5.QtGui import QIcon, QIntValidator, QDoubleValidator
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QComboBox, QLineEdit, QCheckBox, QFileDialog
 
-from BasicBox import Box
+from BasicBox import BasicBox
+from HingeBox import HingeBox
+
 from SVGCreator import SVGCreator
 from SVGScene import SVGScene
 from common import DotDict, BoxType
@@ -117,7 +119,12 @@ class Main(QMainWindow):
     # Slots and Actions
     def _build_geometry(self):
         self._init_properties()
-        box = self.box = Box(self.props)
+
+        if self.btnHinge.isChecked():
+            box = self.box = HingeBox(self.props)
+        else:
+            box = self.box = BasicBox(self.props)
+
         self.scnSide.clear()
         self.scnEnd.clear()
         self.scnBottom.clear()

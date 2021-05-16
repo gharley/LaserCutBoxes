@@ -65,12 +65,24 @@ class Hinge:
         self._start_point = value
 
     def add_short_lines(self, short_length, gap_length_v, gap_length_h):
+        first_time = self.short_line_index == -1
         start_point = self.start_point if len(self._outer_lines) == 0 else self._outer_lines[-1][1]
 
-        _, line = add_line(start_point, short_length, self._outer_lines)
-        _, line = add_line(line[1], gap_length_v, self._outer_lines)
+        index, line = add_line(start_point, short_length, self._outer_lines)
+        if first_time:
+            self.short_line_index = index
+
+        index, line = add_line(line[1], gap_length_v, self._outer_lines)
+        self._outer_lines[index] = line + (1, )  # pseudo construction line
+        if self.gap_v_line_index == -1:
+            self.gap_v_line_index = index
+
         add_line(line[1], short_length, self._outer_lines)
-        add_line(start_point, gap_length_h, self._outer_lines)
+
+        index, line = add_line(start_point, gap_length_h, self._outer_lines)
+        self._outer_lines[index] = line + (1, )  # pseudo construction line
+        if self.gap_h_line_index == -1:
+            self.gap_h_line_index = index
 
     def draw(self):
         hinge_length = vector(self.length(), 0)
@@ -104,7 +116,7 @@ class Hinge:
         return float(Hinge.segment_width * Hinge.num_segments)
 
 
-class Box:
+class HingeBox:
     def __init__(self, props):
         self.props = props
         self.box_type = BoxType.All
@@ -135,7 +147,7 @@ class Box:
 
         self.props.adjust = (Hinge.radius * 2 - Hinge.arc_length()) + Hinge.length()
 
-    def build_side(self):
+    def build_long_side(self):
         props = self.props
 
         width = float(props.width - props.adjust)
@@ -157,7 +169,7 @@ class Box:
             if self.box_type == BoxType.SLOTS:
                 line2 = [(bottom_start, bottom_start + length)]
             else:
-                line2 = self.draw_edge_tabs(num_tabs, length.x, Direction.NORTH, False, bottom_start)
+                line2 = draw_edge_tabs(Face.SIDE, Direction.NORTH, True, length.x, bottom_start, props)
 
             return line1, line2
 

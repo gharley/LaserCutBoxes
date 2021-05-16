@@ -19,7 +19,7 @@ BOTTOM = 2
 LEFT = 3
 
 
-class Box:
+class BasicBox:
     def __init__(self, props):
         self.props = props
         self._bottom = []
