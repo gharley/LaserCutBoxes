@@ -80,9 +80,6 @@ class BasicBox:
         if self.props.edgeTabWidth == 0:
             self.props.edgeTabWidth = self.props.tabWidth
 
-        def calc_gap(width, num_tabs, tab_width):
-            return float((width - num_tabs * tab_width) / (num_tabs + 1))
-
         self.props.sideGap = calc_gap(self.props.width, self.props.numTabsWidth, self.props.tabWidth)
         self.props.endGap = calc_gap(self.props.depth, self.props.numTabsDepth, self.props.tabWidth)
         self.props.heightGap = calc_gap(self.props.height, self.props.numTabsHeight, self.props.edgeTabWidth)

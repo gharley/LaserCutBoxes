@@ -37,10 +37,6 @@ class Hinge:
             start_point = vector(0, 0)
         self.start_point = start_point
 
-        self.long_line_index = -1
-        self.short_line_index = -1
-        self.gap_v_line_index = -1
-        self.gap_h_line_index = -1
         self.top_line_index = -1
         self.bottom_line_index = -1
         self.offset_line_index = -1
@@ -65,24 +61,11 @@ class Hinge:
         self._start_point = value
 
     def add_short_lines(self, short_length, gap_length_v, gap_length_h):
-        first_time = self.short_line_index == -1
         start_point = self.start_point if len(self._outer_lines) == 0 else self._outer_lines[-1][1]
 
-        index, line = add_line(start_point, short_length, self._outer_lines)
-        if first_time:
-            self.short_line_index = index
-
-        index, line = add_line(line[1], gap_length_v, self._outer_lines)
-        self._outer_lines[index] = line + (1, )  # pseudo construction line
-        if self.gap_v_line_index == -1:
-            self.gap_v_line_index = index
-
+        _, line = add_line(start_point, short_length, self._outer_lines)
+        _, line = add_line(line[1], gap_length_v)
         add_line(line[1], short_length, self._outer_lines)
-
-        index, line = add_line(start_point, gap_length_h, self._outer_lines)
-        self._outer_lines[index] = line + (1, )  # pseudo construction line
-        if self.gap_h_line_index == -1:
-            self.gap_h_line_index = index
 
     def draw(self):
         hinge_length = vector(self.length(), 0)
@@ -98,10 +81,7 @@ class Hinge:
             self.add_short_lines(long_length / 2, gap_length_v, gap_length_h)
 
             long_start = self._outer_lines[-1][1][1] - (gap_length_h / 2) + (gap_length_v / 2)
-            line_index, inner_line = add_line(long_start, long_length, self._inner_lines)
-
-            if idx == 0:
-                self.long_line_index = line_index
+            add_line(long_start, long_length, self._inner_lines)
 
         self.add_short_lines(long_length / 2, gap_length_v, gap_length_h)
 
@@ -131,6 +111,14 @@ class HingeBox:
     def side(self):
         return self._side
 
+    @property
+    def outer_height(self):
+        return self.props.outerHeight
+
+    @property
+    def outer_width(self):
+        return self.props.width + self.props.thickness
+
     def _init_properties(self):
         if self.props.depth == 0:
             self.props.depth = self.props.width
@@ -143,6 +131,13 @@ class HingeBox:
 
         if self.props.numTabsDepth == 0:
             self.props.numTabsDepth = self.props.numTabsWidth
+
+        if self.props.box_type == BoxType.All:
+            self.props.outerHeight = self.props.height + self.props.lidThickness + self.props.bottomThickness * 2
+        elif self.props.box_type == BoxType.SLOTS:
+            self.props.outerHeight = self.props.height + self.props.lidThickness + self.props.bottomThickness
+        else:
+            self.props.outerHeight = self.props.height + self.props.bottomThickness
 
         self.props.gapH = float(
             (self.props.width - self.props.radius * 2.0 - self.props.numTabsWidth * self.props.tabWidth) / (self.props.numTabsWidth + 1))
@@ -164,6 +159,8 @@ class HingeBox:
         height = props.height
         bottom_thickness = props.bottomThickness
         lid_thickness = props.lidThickness
+
+        props.sideGap = calc_gap(width, props.numTabsWidth, props.tabWidth)
 
         if self.box_type == BoxType.All:
             actual_height = height + lid_thickness + bottom_thickness * 2.0
@@ -202,6 +199,9 @@ class HingeBox:
         long_length = vector(width, 0)
 
         hinge, first_top, first_bottom = draw_side(upper_left, lower_left, short_length / 2.0)
+        self._side.append(hinge.outer_lines)
+        self._side.append(hinge.inner_lines)
+
         hinge, hinge_top, hinge_bottom = draw_side(first_top, first_bottom, long_length, props.numTabsWidth)
         hinge, hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, short_length, props.numTabsDepth)
         hinge, hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, long_length, props.numTabsWidth)
@@ -254,7 +254,7 @@ class HingeBox:
     def draw_dovetails(self, start_point, end_point):
         num_tabs = self.props.numTabsHeight
         tab_width = self.props.tabWidth
-        height = end_point.y - start_point.y
+        height = end_point[1] - start_point[1]
         gap = (height - num_tabs * tab_width) / (num_tabs + 1)
         gap_length = vector(0, gap)
 
@@ -327,114 +327,3 @@ class HingeBox:
                 sketch.addConstraint(Sketcher.Constraint('DistanceY', first[TOP], END, tab[TOP], START, 0))
 
         return tabs
-
-    def draw_edge_tabs(self, sketch, num_tabs, length, direction, is_bottom, start, gap=None):
-        props = self.props
-        is_vertical = direction is Direction.EAST or direction is Direction.WEST
-
-        if gap is None:
-            gap = props.gapV if is_vertical else props.gapH
-
-        offset = (length - num_tabs * props.tabWidth - gap * (num_tabs - 1)) / 2.0
-
-        lines = []
-
-        def add_line(start_point, end_offset, previous):
-            end_point = start_point + end_offset
-            new_line = Part.LineSegment(start_point, end_point)
-            new_index = sketch.addGeometry(new_line, False)
-
-            if self.constrain and previous != -1:
-                sketch.addConstraint(Sketcher.Constraint('Coincident', previous, END, new_index, START))
-                sketch.addConstraint(Sketcher.Constraint('Perpendicular', previous, new_index))
-
-            lines.append(new_index)
-
-            return new_index, new_line
-
-        if is_vertical:
-            offset_length = vector(0, offset)
-
-            thickness = props.thickness
-
-            if direction == Direction.WEST:
-                thickness = -thickness
-
-            gap_length = vector(0, gap)
-            tab_length = vector(0, props.tabWidth)
-            thickness_length = vector(thickness, 0)
-        else:
-            offset_length = vector(offset, 0)
-
-            if is_bottom:
-                thickness = -props.thickness
-            else:
-                thickness = props.bottomThickness
-
-            if (is_bottom and direction == Direction.NORTH) or (not is_bottom and direction == Direction.SOUTH):
-                thickness = -thickness
-
-            gap_length = vector(gap, 0)
-            tab_length = vector(props.tabWidth, 0)
-            thickness_length = vector(0, thickness)
-
-        gap_line_index = -1
-        first_tab_index = -1
-        offset_line_index = -1
-        thickness_line_index = -1
-        line_index = -1
-        line = Optional[Part.LineSegment]
-
-        for idx in range(0, num_tabs):
-            if idx == 0:
-                line_index, line = add_line(start, offset_length, line_index)
-
-                offset_line_index = line_index
-                if self.constrain:
-                    if is_vertical:
-                        sketch.addConstraint(Sketcher.Constraint('Vertical', offset_line_index))
-                    else:
-                        sketch.addConstraint(Sketcher.Constraint('Horizontal', offset_line_index))
-            else:
-                line_index, line = add_line(line.EndPoint, gap_length, line_index)
-
-                if gap_line_index == -1:
-                    gap_line_index = line_index
-                    if self.constrain:
-                        constraint_type = 'DistanceY' if is_vertical else 'DistanceX'
-                        sketch.addConstraint(Sketcher.Constraint(constraint_type, gap_line_index, gap))
-                elif self.constrain:
-                    sketch.addConstraint(Sketcher.Constraint('Equal', gap_line_index, line_index))
-
-            line_index, line = add_line(line.EndPoint, thickness_length, line_index)
-
-            if idx == 0:
-                thickness_line_index = line_index
-                if self.constrain:
-                    constraint_type = 'DistanceX' if is_vertical else 'DistanceY'
-                    sketch.addConstraint(Sketcher.Constraint(constraint_type, thickness_line_index, thickness))
-            elif self.constrain:
-                sketch.addConstraint(Sketcher.Constraint('Equal', thickness_line_index, line_index))
-
-            line_index, line = add_line(line.EndPoint, tab_length, line_index)
-
-            if idx == 0:
-                first_tab_index = line_index
-                if self.constrain:
-                    constraint_type = 'DistanceY' if is_vertical else 'DistanceX'
-                    sketch.addConstraint(Sketcher.Constraint(constraint_type, first_tab_index, props.tabWidth))
-            elif self.constrain:
-                sketch.addConstraint(Sketcher.Constraint('Equal', first_tab_index, line_index))
-
-            line_index, line = add_line(line.EndPoint, -thickness_length, line_index)
-            if self.constrain:
-                sketch.addConstraint(Sketcher.Constraint('Equal', thickness_line_index, line_index))
-
-        line_index, line = add_line(line.EndPoint, offset_length, line_index)
-
-        if self.constrain:
-            index = line_index if direction == Direction.EAST or direction == Direction.SOUTH else offset_line_index
-            constraint_type = 'DistanceY' if is_vertical else 'DistanceX'
-            sketch.addConstraint(Sketcher.Constraint(constraint_type, index, offset))
-
-        return lines

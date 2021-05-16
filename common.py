@@ -33,17 +33,24 @@ class Face(Enum):
 
 
 # Helper methods
-def add_line(start_point, end_offset, lines):
+def add_line(start_point, end_offset, lines=None):
     end_point = start_point + end_offset
     if abs(end_point[0]) < 0.0001: end_point[0] = 0.0
     if abs(end_point[1]) < 0.0001: end_point[1] = 0.0
 
     new_line = (start_point, end_point)
 
-    lines.append(new_line)
-    index = len(lines) - 1
+    if lines is not None:
+        lines.append(new_line)
+        index = len(lines) - 1
+    else:
+        index = -1
 
     return index, new_line
+
+
+def calc_gap(width, num_tabs, tab_width):
+    return float((width - num_tabs * tab_width) / (num_tabs + 1))
 
 
 def draw_edge_tabs(face, direction, is_inset, length, start, props):
