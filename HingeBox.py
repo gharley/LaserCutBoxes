@@ -91,15 +91,13 @@ class Hinge:
         gap_length_v = vector(0, self.thickness * 2)
         gap_length_h = vector(self.segment_width, 0)
 
-        # self.bottom_line_index = self.sketch.addGeometry(Part.LineSegment(self.start_point, self.start_point + hinge_length), False)
-        #
-        # self.top_line_index = self.sketch.addGeometry(
-        #     Part.LineSegment(self.start_point + hinge_height, self.start_point + hinge_height + hinge_length), False)
+        self.bottom_line_index, line = add_line(self.start_point, hinge_length, self._inner_lines)
+        self.top_line_index, line = add_line(self.start_point + hinge_height, hinge_length, self._inner_lines)
 
         for idx in range(0, self.num_segments):
             self.add_short_lines(long_length / 2, gap_length_v, gap_length_h)
 
-            long_start =self._outer_lines[-1][1][1] - (gap_length_h / 2) + (gap_length_v / 2)
+            long_start = self._outer_lines[-1][1][1] - (gap_length_h / 2) + (gap_length_v / 2)
             line_index, inner_line = add_line(long_start, long_length, self._inner_lines)
 
             if idx == 0:
@@ -119,8 +117,19 @@ class Hinge:
 class HingeBox:
     def __init__(self, props):
         self.props = props
+        self._bottom = []
+        self._side = []
+
         self.box_type = BoxType.All
         self._init_properties()
+
+    @property
+    def bottom(self):
+        return self._bottom
+
+    @property
+    def side(self):
+        return self._side
 
     def _init_properties(self):
         if self.props.depth == 0:
@@ -163,27 +172,27 @@ class HingeBox:
         else:
             actual_height = height + bottom_thickness
 
-        def draw_lines(top_start, bottom_start, length, num_tabs=1):
-            line1 = (top_start, top_start + length)
+        def draw_lines(top_start, bottom_start, length):
+            _, line = add_line(top_start, top_start + length, self._side)
+            self._side.append(line)
 
             if self.box_type == BoxType.SLOTS:
-                line2 = [(bottom_start, bottom_start + length)]
+                _, line = add_line(bottom_start, bottom_start + length, self._side)
+                self._side.append(line)
             else:
-                line2 = draw_edge_tabs(Face.SIDE, Direction.NORTH, True, length.x, bottom_start, props)
-
-            return line1, line2
+                self._side.append(draw_edge_tabs(Face.SIDE, Direction.NORTH, True, length[0], bottom_start, props))
 
         def draw_side(top_start, bottom_start, length, num_tabs=1):
-            draw_lines(top_start, bottom_start, length, num_tabs)
+            draw_lines(top_start, bottom_start, length)
 
-            if self.box_type != BoxType.TABS:
-                draw_slots(num_tabs, length.x, top_start, self.props)
+            # if self.box_type != BoxType.TABS:
+            #     draw_slots(num_tabs, length.x, top_start, self.props)
 
             new_hinge = Hinge(actual_height, bottom_start + length)
             new_hinge.draw()
 
-            top = sketch.Geometry[new_hinge.top_line_index].EndPoint
-            bottom = sketch.Geometry[new_hinge.bottom_line_index].EndPoint
+            top = new_hinge.outer_lines[new_hinge.top_line_index][1]
+            bottom = new_hinge.outer_lines[new_hinge.bottom_line_index][1]
 
             return new_hinge, top, bottom
 
@@ -193,17 +202,17 @@ class HingeBox:
         long_length = vector(width, 0)
 
         hinge, first_top, first_bottom = draw_side(upper_left, lower_left, short_length / 2.0)
-        hinge, hinge_top, hinge_bottom = draw_side(first_top, first_bottom, long_length, props.numTabsWidth, hinge)
-        hinge, hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, short_length, props.numTabsDepth, hinge)
-        hinge, hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, long_length, props.numTabsWidth, hinge)
+        hinge, hinge_top, hinge_bottom = draw_side(first_top, first_bottom, long_length, props.numTabsWidth)
+        hinge, hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, short_length, props.numTabsDepth)
+        hinge, hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, long_length, props.numTabsWidth)
 
         draw_lines(hinge_top, hinge_bottom, short_length / 2.0)
 
         self.draw_dovetails(lower_left, upper_left)
         self.draw_dovetails(hinge_bottom + short_length / 2, hinge_top + short_length / 2.0)
 
-        if self.box_type != BoxType.TABS:
-            self.draw_slots(1, short_length.x / 2, hinge_top, self.props)
+        # if self.box_type != BoxType.TABS:
+        #     self.draw_slots(1, short_length.x / 2, hinge_top, self.props)
 
     def build_bottom(self):
         props = self.props
@@ -250,22 +259,23 @@ class HingeBox:
         gap_length = vector(0, gap)
 
         def draw_dovetail(start):
-            dt_line = Part.LineSegment(start, start + vector(tab_width, -tab_width / 2))
-            sketch.addGeometry(dt_line, False)
-            dt_line = Part.LineSegment(dt_line.EndPoint, dt_line.EndPoint + vector(0, tab_width * 2))
-            sketch.addGeometry(dt_line, False)
-            dt_line = Part.LineSegment(dt_line.EndPoint, dt_line.EndPoint + vector(-tab_width, -tab_width / 2))
-            sketch.addGeometry(dt_line, False)
+            dt_line = (start, start + vector(tab_width, -tab_width / 2))
+            self._side.append(dt_line)
+            dt_line = (dt_line[1], dt_line[1] + vector(0, tab_width * 2))
+            self._side.append(dt_line)
+            dt_line =(dt_line[1], dt_line[1] + vector(-tab_width, -tab_width / 2))
+            self._side.append(dt_line)
 
             return dt_line
 
-        line = Part.LineSegment(start_point, start_point + gap_length)
-        sketch.addGeometry(line, False)
+        line = (start_point, start_point + gap_length)
+        self._side.append(line)
 
         for idx in range(0, num_tabs):
-            line = draw_dovetail(line.EndPoint)
-            line = Part.LineSegment(line.EndPoint, line.EndPoint + gap_length)
-            sketch.addGeometry(line, False)
+            line = draw_dovetail(line[1])
+            self._side.append(line)
+            line = (line[1], line[1] + gap_length)
+            self._side.append(line)
 
     def draw_slots(self, sketch, num_tabs, width, start_point):
         if start_point is None:
