@@ -41,16 +41,15 @@ class Hinge:
         self.bottom_line_index = -1
         self.offset_line_index = -1
 
-        self._outer_lines = []
-        self._inner_lines = []
+        self._lines = []
 
     @property
-    def inner_lines(self):
-        return self._inner_lines
+    def bottom_line(self):
+        return self._lines[self.bottom_line_index]
 
     @property
-    def outer_lines(self):
-        return self._outer_lines
+    def lines(self):
+        return self._lines
 
     @property
     def start_point(self):
@@ -60,12 +59,9 @@ class Hinge:
     def start_point(self, value):
         self._start_point = value
 
-    def add_short_lines(self, short_length, gap_length_v, gap_length_h):
-        start_point = self.start_point if len(self._outer_lines) == 0 else self._outer_lines[-1][1]
-
-        _, line = add_line(start_point, short_length, self._outer_lines)
-        _, line = add_line(line[1], gap_length_v)
-        add_line(line[1], short_length, self._outer_lines)
+    @property
+    def top_line(self):
+        return self._lines[self.top_line_index]
 
     def draw(self):
         hinge_length = vector(self.length(), 0)
@@ -73,17 +69,22 @@ class Hinge:
         long_length = vector(0, self.height - self.thickness * 2)
         gap_length_v = vector(0, self.thickness * 2)
         gap_length_h = vector(self.segment_width, 0)
+        short_line_start = self.start_point
+        long_line_start = self.start_point + gap_length_h / 2 + gap_length_v / 2
 
-        self.bottom_line_index, line = add_line(self.start_point, hinge_length, self._inner_lines)
-        self.top_line_index, line = add_line(self.start_point + hinge_height, hinge_length, self._inner_lines)
+        self.top_line_index, line = add_line(self.start_point + hinge_height, hinge_length, self._lines)
+        self.bottom_line_index, line = add_line(self.start_point, hinge_length, self._lines)
+
+        def add_short_lines():
+            _, first_line = add_line(short_line_start, long_length / 2, self._lines)
+            add_line(first_line[1] + gap_length_v, long_length / 2, self._lines)
+            return short_line_start + gap_length_h
 
         for idx in range(0, self.num_segments):
-            self.add_short_lines(long_length / 2, gap_length_v, gap_length_h)
+            short_line_start = add_short_lines()
+            add_line(long_line_start + gap_length_h * idx, long_length, self._lines)
 
-            long_start = self._outer_lines[-1][1][1] - (gap_length_h / 2) + (gap_length_v / 2)
-            add_line(long_start, long_length, self._inner_lines)
-
-        self.add_short_lines(long_length / 2, gap_length_v, gap_length_h)
+        add_short_lines()
 
     @staticmethod
     def arc_length():
@@ -162,22 +163,13 @@ class HingeBox:
 
         props.sideGap = calc_gap(width, props.numTabsWidth, props.tabWidth)
 
-        if self.box_type == BoxType.All:
-            actual_height = height + lid_thickness + bottom_thickness * 2.0
-        elif self.box_type == BoxType.SLOTS:
-            actual_height = height + lid_thickness + bottom_thickness
-        else:
-            actual_height = height + bottom_thickness
-
         def draw_lines(top_start, bottom_start, length):
             _, line = add_line(top_start, top_start + length, self._side)
-            self._side.append(line)
 
-            if self.box_type == BoxType.SLOTS:
-                _, line = add_line(bottom_start, bottom_start + length, self._side)
-                self._side.append(line)
-            else:
-                self._side.append(draw_edge_tabs(Face.SIDE, Direction.NORTH, True, length[0], bottom_start, props))
+            # if self.box_type == BoxType.SLOTS:
+            #     _, line = add_line(bottom_start, bottom_start + length, self._side)
+            # else:
+            #     self._side.extend(draw_edge_tabs(Face.SIDE, Direction.SOUTH, True, length[0], bottom_start, props))
 
         def draw_side(top_start, bottom_start, length, num_tabs=1):
             draw_lines(top_start, bottom_start, length)
@@ -185,31 +177,27 @@ class HingeBox:
             # if self.box_type != BoxType.TABS:
             #     draw_slots(num_tabs, length.x, top_start, self.props)
 
-            new_hinge = Hinge(actual_height, bottom_start + length)
+            new_hinge = Hinge(self.outer_height, bottom_start + length)
             new_hinge.draw()
+            self._side.extend(new_hinge.lines)
 
-            top = new_hinge.outer_lines[new_hinge.top_line_index][1]
-            bottom = new_hinge.outer_lines[new_hinge.bottom_line_index][1]
+            return new_hinge, new_hinge.top_line[1], new_hinge.bottom_line[1]
 
-            return new_hinge, top, bottom
-
-        lower_left, upper_left, lower_right, upper_right = get_vectors(width, actual_height)
+        lower_left, upper_left, lower_right, upper_right = get_vectors(width, self.outer_height)
 
         short_length = vector(depth, 0)
         long_length = vector(width, 0)
 
         hinge, first_top, first_bottom = draw_side(upper_left, lower_left, short_length / 2.0)
-        self._side.append(hinge.outer_lines)
-        self._side.append(hinge.inner_lines)
-
         hinge, hinge_top, hinge_bottom = draw_side(first_top, first_bottom, long_length, props.numTabsWidth)
-        hinge, hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, short_length, props.numTabsDepth)
-        hinge, hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, long_length, props.numTabsWidth)
+        # hinge, hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, short_length, props.numTabsDepth)
+        # hinge, hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, long_length, props.numTabsWidth)
 
         draw_lines(hinge_top, hinge_bottom, short_length / 2.0)
 
         self.draw_dovetails(lower_left, upper_left)
-        self.draw_dovetails(hinge_bottom + short_length / 2, hinge_top + short_length / 2.0)
+        self.draw_dovetails(lower_right, upper_right)
+        # self.draw_dovetails(hinge_bottom + short_length / 2, hinge_top + short_length / 2.0)
 
         # if self.box_type != BoxType.TABS:
         #     self.draw_slots(1, short_length.x / 2, hinge_top, self.props)
