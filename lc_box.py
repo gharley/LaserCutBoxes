@@ -131,7 +131,10 @@ class Main(QMainWindow):
 
         if self.chkSide.isChecked():
             box.build_long_side()
-            self.scnSide.add_lines(box.outer_width, box.outer_height, box.side)
+            if isinstance(box, HingeBox):
+                self.scnSide.add_lines(box.outer_width * 4, box.outer_height, box.side)
+            else:
+                self.scnSide.add_lines(box.outer_width, box.outer_height, box.side)
 
         if self.chkEnd.isChecked():
             box.build_short_side()
