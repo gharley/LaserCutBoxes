@@ -150,7 +150,7 @@ class HingeBox:
         props.sideGap = calc_gap(width, props.numTabsWidth, props.tabWidth)
 
         def draw_lines(top_start, bottom_start, length):
-            add_line(top_start, top_start + length, self._side)
+            add_line(top_start, length, self._side)
 
             if self.props.box_type == BoxType.SLOTS:
                 add_line(bottom_start, length, self._side)
@@ -160,8 +160,8 @@ class HingeBox:
         def draw_side(top_start, bottom_start, length, num_tabs=1):
             draw_lines(top_start, bottom_start, length)
 
-            # if self.props.box_type != BoxType.TABS:
-            #     draw_slots(num_tabs, length.x, top_start, self.props)
+            if self.props.box_type != BoxType.TABS:
+                self._side.extend(draw_slots(num_tabs, self.props.gapH, top_start + vector(self.props.gapH, -self.props.bottomThickness), self.props))
 
             new_hinge = Hinge(self.outer_height, bottom_start + length)
             new_hinge.draw()
@@ -179,13 +179,13 @@ class HingeBox:
         hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, short_length, props.numTabsDepth)
         hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, long_length, props.numTabsWidth)
 
-        # draw_lines(hinge_top, hinge_bottom, short_length / 2.0)
+        draw_lines(hinge_top, hinge_bottom, short_length / 2.0)
 
         self.draw_dovetails(lower_left, upper_left)
         self.draw_dovetails(hinge_bottom + short_length / 2.0, hinge_top + short_length / 2)
 
-        # if self.props.box_type != BoxType.TABS:
-        #     self.draw_slots(1, short_length.x / 2, hinge_top, self.props)
+        if self.props.box_type != BoxType.TABS:
+            self._side.extend(draw_slots(1, self.props.gapH, hinge_top + vector(self.props.gapH, -self.props.bottomThickness), self.props))
 
     def build_bottom(self):
         props = self.props
@@ -243,54 +243,3 @@ class HingeBox:
         for idx in range(0, num_tabs):
             line = draw_dovetail(line[END])
             _, line = add_line(line[END], gap_length, self._side)
-
-    def draw_slots(self, sketch, num_tabs, width, start_point):
-        if start_point is None:
-            start_point = vector(0, 0)
-
-        tabs = []
-        first = []
-        tab_width = self.props.tabWidth
-        gap = self.props.gapH
-        bottom_thickness = self.props.bottomThickness
-        offset = (width - num_tabs * self.props.tabWidth - gap * (num_tabs - 1)) / 2
-        offset_length = vector(tab_width + gap, 0)
-        start_point = start_point + vector(offset, -(self.props.lidThickness + bottom_thickness))
-
-        def draw_slot(start):
-            lower_left, upper_left, lower_right, upper_right = get_vectors(tab_width, bottom_thickness)
-
-            top = sketch.addGeometry(Part.LineSegment(upper_left + start, upper_right + start), False)
-            right = sketch.addGeometry(Part.LineSegment(lower_right + start, upper_right + start), False)
-            bottom = sketch.addGeometry(Part.LineSegment(lower_left + start, lower_right + start), False)
-            left = sketch.addGeometry(Part.LineSegment(lower_left + start, upper_left + start), False)
-
-            box = [top, right, bottom, left]
-
-            if self.constrain:
-                sketch.addConstraint(Sketcher.Constraint('Horizontal', top))
-                sketch.addConstraint(Sketcher.Constraint('Horizontal', bottom))
-                sketch.addConstraint(Sketcher.Constraint('Vertical', left))
-                sketch.addConstraint(Sketcher.Constraint('Vertical', right))
-
-                sketch.addConstraint(Sketcher.Constraint('Coincident', top, END, right, END))
-                sketch.addConstraint(Sketcher.Constraint('Coincident', right, START, bottom, END))
-                sketch.addConstraint(Sketcher.Constraint('Coincident', bottom, START, left, START))
-                sketch.addConstraint(Sketcher.Constraint('Coincident', left, END, top, START))
-
-                sketch.addConstraint(Sketcher.Constraint('DistanceY', left, bottom_thickness))
-                sketch.addConstraint(Sketcher.Constraint('DistanceX', top, tab_width))
-
-            return box
-
-        for idx in range(0, num_tabs):
-            tab = draw_slot(start_point + offset_length * idx)
-            tabs.append(tab)
-
-            if idx == 0:
-                first = tab
-            elif self.constrain:
-                sketch.addConstraint(Sketcher.Constraint('DistanceX', first[TOP], END, tab[TOP], START, offset_length.x * idx))
-                sketch.addConstraint(Sketcher.Constraint('DistanceY', first[TOP], END, tab[TOP], START, 0))
-
-        return tabs
