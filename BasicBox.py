@@ -56,6 +56,9 @@ class BasicBox:
     def _init_properties(self):
         self.props = get_calculated_properties(self.props)
 
+        self.props.sideGap = calc_gap(self.props.width, self.props.numTabsWidth, self.props.tabWidth)
+        self.props.endGap = calc_gap(self.props.depth, self.props.numTabsDepth, self.props.tabWidth)
+
     def _build_side(self, face, tab_func):
         if face is Face.SIDE:
             outer_width = self.outer_width

@@ -119,8 +119,9 @@ class Main(QMainWindow):
     # Slots and Actions
     def _build_geometry(self):
         self._init_properties()
+        is_hinge = self.btnHinge.isChecked()
 
-        if self.btnHinge.isChecked():
+        if is_hinge:
             box = self.box = HingeBox(self.props)
         else:
             box = self.box = BasicBox(self.props)
@@ -136,7 +137,7 @@ class Main(QMainWindow):
             else:
                 self.scnSide.add_lines(box.outer_width, box.outer_height, box.side)
 
-        if self.chkEnd.isChecked():
+        if not is_hinge and self.chkEnd.isChecked():
             box.build_short_side()
             self.scnEnd.add_lines(box.depth, box.outer_height, box.end)
 
@@ -180,13 +181,14 @@ class Main(QMainWindow):
                 return
 
             box = self.box
+            is_hinge = isinstance(box, HingeBox)
             creator = SVGCreator()
 
             if self.chkSide.isChecked():
                 creator.create_svg(box.outer_width, box.outer_height, box.side)
                 creator.write_file('{0}/{1}'.format(dir_name, 'side.svg'))
 
-            if self.chkEnd.isChecked():
+            if not is_hinge and self.chkEnd.isChecked():
                 creator.create_svg(box.outer_depth, box.outer_height, box.end)
                 creator.write_file('{0}/{1}'.format(dir_name, 'end.svg'))
 

@@ -1,6 +1,8 @@
 from lxml import etree as et
 import numpy as np
 
+from graphics import Line
+
 
 class SVGCreator:
     def __init__(self):
@@ -37,14 +39,14 @@ class SVGCreator:
             line = lines[idx]
             if idx > 0:
                 prev_line = lines[idx - 1]
-                if not (np.isclose(prev_line[1][0], line[0][0]) and np.isclose(prev_line[1][1], line[0][1])):
+                if not (np.isclose(prev_line.end[0], line.start[0]) and np.isclose(prev_line.end[1], line.start[1])):
                     paths.append(''.join(path_data))
                     path_data = []
 
             if len(path_data) == 0:
-                path_data.append(move_mask.format(line[0][0], line[0][1]))
+                path_data.append(move_mask.format(line.start[0], line.start[1]))
 
-            path_data.append(line_mask.format(line[1][0], line[1][1]))
+            path_data.append(line_mask.format(line.end[0], line.end[1]))
 
         if len(path_data) > 0:
             paths.append(''.join(path_data))

@@ -60,12 +60,10 @@ def calc_gap(width, num_tabs, tab_width):
     return float((width - num_tabs * tab_width) / (num_tabs + 1))
 
 
-def draw_edge_tabs(face, direction, is_inset, length, start, props):
+def draw_edge_tabs(face, direction, is_inset, length, start, props, num_tabs=None, compensate=True):
     is_vertical = direction is Direction.EAST or direction is Direction.WEST
     config = DotDict()
     config.tabWidth = props.edgeTabWidth if is_vertical and face is not Face.BOTTOM else props.tabWidth
-
-    lines = []
 
     if is_vertical:
         if face is Face.BOTTOM:
@@ -95,7 +93,9 @@ def draw_edge_tabs(face, direction, is_inset, length, start, props):
         if (is_inset and direction == Direction.NORTH) or (not is_inset and direction == Direction.SOUTH):
             config.thickness = -config.thickness
 
+    if num_tabs is not None: config.numTabs = num_tabs
     config.longOffset = (length - config.numTabs * config.tabWidth - config.gap * (config.numTabs - 1)) / 2.0
+
     if direction is Direction.EAST or direction is Direction.SOUTH:
         config.longOffset = -config.longOffset
         config.gap = -config.gap
@@ -107,7 +107,7 @@ def draw_edge_tabs(face, direction, is_inset, length, start, props):
         tab_length = vector(0, config.tabWidth)
         thickness_length = vector(config.thickness, 0)
     else:
-        if face is Face.BOTTOM:
+        if face is Face.BOTTOM or not compensate:
             first_offset = last_offset = vector(config.longOffset, 0)
         else:
             offset = vector(props.thickness / 2.0, 0)
@@ -118,7 +118,8 @@ def draw_edge_tabs(face, direction, is_inset, length, start, props):
         tab_length = vector(config.tabWidth, 0)
         thickness_length = vector(0, config.thickness)
 
-    line = (0, 0)  # something's wrong if this value gets used
+    lines = []
+    line = Line(0, 0)
 
     for idx in range(0, int(config.numTabs)):
         if idx == 0:
@@ -174,8 +175,6 @@ def get_calculated_properties(props):
     if props.edgeTabWidth == 0:
         props.edgeTabWidth = props.tabWidth
 
-    props.sideGap = calc_gap(props.width, props.numTabsWidth, props.tabWidth)
-    props.endGap = calc_gap(props.depth, props.numTabsDepth, props.tabWidth)
     props.heightGap = calc_gap(props.height, props.numTabsHeight, props.edgeTabWidth)
 
     if props.box_type == BoxType.All:

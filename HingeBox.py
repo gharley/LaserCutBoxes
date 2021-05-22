@@ -7,15 +7,8 @@ __Comment__ = "This module creates a living hinge box which can then be saved to
 
 from numpy import pi
 
-from enum import Enum
-
+from graphics import Line
 from common import *
-
-# Indexes for box sides
-TOP = 0
-RIGHT = 1
-BOTTOM = 2
-LEFT = 3
 
 
 class Hinge:
@@ -68,7 +61,7 @@ class Hinge:
 
         def add_short_lines():
             _, first_line = add_line(short_line_start, long_length / 2, self._lines)
-            add_line(first_line[END] + gap_length_v, long_length / 2, self._lines)
+            add_line(first_line.end + gap_length_v, long_length / 2, self._lines)
             return short_line_start + gap_length_h
 
         for idx in range(0, self.num_segments):
@@ -103,6 +96,10 @@ class HingeBox:
         return self._side
 
     @property
+    def outer_depth(self):
+        return self.props.depth + self.props.thickness
+
+    @property
     def outer_height(self):
         return self.props.outerHeight
 
@@ -119,24 +116,28 @@ class HingeBox:
         Hinge.segment_width = self.props.segmentWidth
 
         self.props.adjust = (Hinge.radius * 2 - Hinge.arc_length()) + Hinge.length()
-        # self.props.sideGap -= self.props.adjust / 2
+
+        self.props.sideGap = calc_gap(self.props.width - self.props.adjust, self.props.numTabsWidth, self.props.tabWidth)
+        self.props.endGap = calc_gap(self.props.depth - self.props.adjust, self.props.numTabsDepth, self.props.tabWidth)
 
     def build_long_side(self):
         props = self.props
 
+        # width = float(props.width - Hinge.length())
+        # depth = float(props.depth - Hinge.length())
         width = float(props.width - props.adjust)
         depth = float(props.depth - props.adjust)
 
-        def draw_lines(top_start, bottom_start, length):
+        def draw_lines(top_start, bottom_start, length, num_tabs):
             add_line(top_start, length, self._side)
 
             if self.props.box_type == BoxType.SLOTS:
                 add_line(bottom_start, length, self._side)
-            # else:
-            #     self._side.extend(draw_edge_tabs(Face.SIDE, Direction.SOUTH, True, length[0], bottom_start, props))
+            else:
+                self._side.extend(draw_edge_tabs(Face.SIDE, Direction.SOUTH, True, length[0], bottom_start + length, props, num_tabs, False))
 
         def draw_side(top_start, bottom_start, length, num_tabs=1):
-            draw_lines(top_start, bottom_start, length)
+            draw_lines(top_start, bottom_start, length, num_tabs)
 
             if self.props.box_type != BoxType.TABS:
                 self._side.extend(draw_slots(num_tabs, props.gapH, top_start + vector(props.sideGap, -props.bottomThickness), props))
@@ -145,7 +146,7 @@ class HingeBox:
             new_hinge.draw()
             self._side.extend(new_hinge.lines)
 
-            return new_hinge.top_line[END], new_hinge.bottom_line[END]
+            return new_hinge.top_line.end, new_hinge.bottom_line.end
 
         lower_left, upper_left, _, _ = get_vectors(width, self.outer_height)
 
@@ -157,7 +158,7 @@ class HingeBox:
         hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, short_length, props.numTabsDepth)
         hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, long_length, props.numTabsWidth)
 
-        draw_lines(hinge_top, hinge_bottom, short_length / 2.0)
+        draw_lines(hinge_top, hinge_bottom, short_length / 2.0, 1)
 
         self.draw_dovetails(lower_left, upper_left)
         self.draw_dovetails(hinge_bottom + short_length / 2.0, hinge_top + short_length / 2)
@@ -177,30 +178,31 @@ class HingeBox:
         offset_v = vector(0, radius)
         last_gap = ((props.depth - props.adjust) / 2.0 - props.tabWidth)
 
-        box = [self.draw_edge_tabs(props.numTabsWidth, width, Direction.NORTH, True, upper_left + offset_h, self.props),
-               self.draw_edge_tabs(props.numTabsDepth, depth, Direction.EAST, True, lower_right + offset_v, self.props),
-               self.draw_edge_tabs(props.numTabsWidth, width, Direction.SOUTH, True, lower_left + offset_h, self.props),
-               self.draw_edge_tabs(2, depth, Direction.WEST, True, lower_left + offset_v, last_gap), self.props]
+        self._bottom = []
+        self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.NORTH, True, width, upper_left + offset_h, props))
+        self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.EAST, True, depth, lower_right + offset_v, props))
+        self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.SOUTH, True, width, lower_left + offset_h, props))
+        self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.WEST, True, depth, lower_left + offset_v, props, 2))
 
-        arc_stop = sketch.Geometry[box[LEFT][0]].StartPoint.y
-        arc_start = sketch.Geometry[box[BOTTOM][0]].StartPoint.x
-        circle = Part.Circle(vector(arc_start, arc_stop), vector(0, 0, 1), radius)
-        bl = sketch.addGeometry(Part.ArcOfCircle(circle, pi, pi * 1.5), False)
-
-        arc_start = sketch.Geometry[box[TOP][0]].StartPoint.x
-        arc_stop = sketch.Geometry[box[LEFT][-1]].EndPoint.y
-        circle = Part.Circle(vector(arc_start, arc_stop), vector(0, 0, 1), radius)
-        tl = sketch.addGeometry(Part.ArcOfCircle(circle, pi / 2.0, pi), False)
-
-        arc_start = sketch.Geometry[box[TOP][-1]].EndPoint.x
-        arc_stop = sketch.Geometry[box[RIGHT][-1]].EndPoint.y
-        circle = Part.Circle(vector(arc_start, arc_stop), vector(0, 0, 1), radius)
-        tr = sketch.addGeometry(Part.ArcOfCircle(circle, 0, pi / 2.0), False)
-
-        arc_start = sketch.Geometry[box[BOTTOM][-1]].EndPoint.x
-        arc_stop = sketch.Geometry[box[RIGHT][0]].StartPoint.y
-        circle = Part.Circle(vector(arc_start, arc_stop), vector(0, 0, 1), radius)
-        br = sketch.addGeometry(Part.ArcOfCircle(circle, pi * 1.5, 0), False)
+        # arc_stop = sketch.Geometry[box[LEFT][0]].StartPoint.y
+        # arc_start = sketch.Geometry[box[BOTTOM][0]].StartPoint.x
+        # circle = Part.Circle(vector(arc_start, arc_stop), vector(0, 0, 1), radius)
+        # bl = sketch.addGeometry(Part.ArcOfCircle(circle, pi, pi * 1.5), False)
+        #
+        # arc_start = sketch.Geometry[box[TOP][0]].StartPoint.x
+        # arc_stop = sketch.Geometry[box[LEFT][-1]].EndPoint.y
+        # circle = Part.Circle(vector(arc_start, arc_stop), vector(0, 0, 1), radius)
+        # tl = sketch.addGeometry(Part.ArcOfCircle(circle, pi / 2.0, pi), False)
+        #
+        # arc_start = sketch.Geometry[box[TOP][-1]].EndPoint.x
+        # arc_stop = sketch.Geometry[box[RIGHT][-1]].EndPoint.y
+        # circle = Part.Circle(vector(arc_start, arc_stop), vector(0, 0, 1), radius)
+        # tr = sketch.addGeometry(Part.ArcOfCircle(circle, 0, pi / 2.0), False)
+        #
+        # arc_start = sketch.Geometry[box[BOTTOM][-1]].EndPoint.x
+        # arc_stop = sketch.Geometry[box[RIGHT][0]].StartPoint.y
+        # circle = Part.Circle(vector(arc_start, arc_stop), vector(0, 0, 1), radius)
+        # br = sketch.addGeometry(Part.ArcOfCircle(circle, pi * 1.5, 0), False)
 
     def draw_dovetails(self, start_point, end_point):
         num_tabs = self.props.numTabsHeight
@@ -211,13 +213,13 @@ class HingeBox:
 
         def draw_dovetail(start):
             _, dt_line = add_line(start, vector(tab_width, -tab_width / 2), self._side)
-            _, dt_line = add_line(dt_line[END], vector(0, tab_width * 2), self._side)
-            _, dt_line = add_line(dt_line[END], vector(-tab_width, -tab_width / 2), self._side)
+            _, dt_line = add_line(dt_line.end, vector(0, tab_width * 2), self._side)
+            _, dt_line = add_line(dt_line.end, vector(-tab_width, -tab_width / 2), self._side)
 
             return dt_line
 
         _, line = add_line(start_point, gap_length, self._side)
 
         for idx in range(0, num_tabs):
-            line = draw_dovetail(line[END])
-            _, line = add_line(line[END], gap_length, self._side)
+            line = draw_dovetail(line.end)
+            _, line = add_line(line.end, gap_length, self._side)
