@@ -25,3 +25,9 @@ class Line(GraphicsItem):
         super(Line, self).__init__(start, end)
         self._type = 'LINE'
 
+
+class Arc(Line):
+    def __init__(self, start, end, radius):
+        super(Arc, self).__init__(start, end)
+        self._type = 'ARC'
+        self.radius = radius

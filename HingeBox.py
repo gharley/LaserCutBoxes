@@ -179,10 +179,10 @@ class HingeBox:
         last_gap = ((props.depth - props.adjust) / 2.0 - props.tabWidth)
 
         self._bottom = []
-        self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.NORTH, True, width, upper_left + offset_h, props))
-        self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.EAST, True, depth, lower_right + offset_v, props))
-        self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.SOUTH, True, width, lower_left + offset_h, props))
-        self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.WEST, True, depth, lower_left + offset_v, props, 2))
+        self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.NORTH, False, width, upper_left + offset_h, props))
+        self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.EAST, False, depth, upper_right - offset_v, props))
+        self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.SOUTH, False, width, lower_right - offset_h, props))
+        self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.WEST, False, depth, lower_left + offset_v, props, 2))
 
         # arc_stop = sketch.Geometry[box[LEFT][0]].StartPoint.y
         # arc_start = sketch.Geometry[box[BOTTOM][0]].StartPoint.x

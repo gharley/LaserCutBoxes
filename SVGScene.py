@@ -19,7 +19,7 @@ class SVGScene(QGraphicsScene):
 
     def add_lines(self, width, height, lines):
         self.clear()
-        self.setSceneRect(QRectF(-_PADDING, -height, width + _PADDING, height))
+        self.setSceneRect(QRectF(-_PADDING, -height - _PADDING, width + _PADDING * 2, height + _PADDING * 2))
         pen = QPen(QColor(0))
         pen.setWidth(0)
 
