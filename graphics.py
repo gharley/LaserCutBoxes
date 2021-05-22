@@ -1,3 +1,5 @@
+from PyQt5.QtWidgets import QGraphicsItem, QGraphicsEllipseItem
+
 from common import *
 
 
@@ -19,6 +21,11 @@ class GraphicsItem:
     def type(self):
         return self._type
 
+    @staticmethod
+    def arc_to_qt(arc):
+        ellipse = QGraphicsEllipseItem(arc.start, 0, 0, 0)
+        pass
+
 
 class Line(GraphicsItem):
     def __init__(self, start, end):
@@ -26,8 +33,10 @@ class Line(GraphicsItem):
         self._type = 'LINE'
 
 
-class Arc(Line):
-    def __init__(self, start, end, radius):
+class Arc(GraphicsItem):
+    def __init__(self, start, end, radius, start_angle, end_angle):
         super(Arc, self).__init__(start, end)
         self._type = 'ARC'
         self.radius = radius
+        self.start_angle = start_angle
+        self.end_angle = end_angle

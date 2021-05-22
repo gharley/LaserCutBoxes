@@ -7,7 +7,7 @@ __Comment__ = "This module creates a living hinge box which can then be saved to
 
 from numpy import pi
 
-from graphics import Line
+from graphics import Line, Arc
 from common import *
 
 
@@ -184,6 +184,7 @@ class HingeBox:
         self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.SOUTH, False, width, lower_right - offset_h, props))
         self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.WEST, False, depth, lower_left + offset_v, props, 2))
 
+        self._bottom.append(Arc(upper_left - offset_v, upper_left + offset_h, radius))
         # arc_stop = sketch.Geometry[box[LEFT][0]].StartPoint.y
         # arc_start = sketch.Geometry[box[BOTTOM][0]].StartPoint.x
         # circle = Part.Circle(vector(arc_start, arc_stop), vector(0, 0, 1), radius)
