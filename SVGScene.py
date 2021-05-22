@@ -4,6 +4,8 @@ from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 from PyQt5.QtCore import QObject, QEvent, QRectF
 from PyQt5.QtGui import QPen, QColor, QTransform
 
+from graphics import Line
+
 _PADDING = 5
 
 
@@ -22,8 +24,8 @@ class SVGScene(QGraphicsScene):
         pen.setWidth(0)
 
         for line in lines:
-            if len(line) > 2: continue
-            self.addLine(line[0][0], line[0][1], line[1][0], line[1][1], pen)
+            if isinstance(line, Line):
+                self.addLine(line.start[0], line.start[1], line.end[0], line.end[1], pen)
 
         self.scale()
 

@@ -111,29 +111,7 @@ class HingeBox:
         return self.props.width + self.props.thickness
 
     def _init_properties(self):
-        if self.props.depth == 0:
-            self.props.depth = self.props.width
-
-        if self.props.bottomThickness == 0:
-            self.props.bottomThickness = self.props.thickness
-
-        if self.props.lidThickness == 0:
-            self.props.lidThickness = self.props.thickness
-
-        if self.props.numTabsDepth == 0:
-            self.props.numTabsDepth = self.props.numTabsWidth
-
-        if self.props.box_type == BoxType.All:
-            self.props.outerHeight = self.props.height + self.props.lidThickness + self.props.bottomThickness * 2
-        elif self.props.box_type == BoxType.SLOTS:
-            self.props.outerHeight = self.props.height + self.props.lidThickness + self.props.bottomThickness
-        else:
-            self.props.outerHeight = self.props.height + self.props.bottomThickness
-
-        self.props.gapH = float(
-            (self.props.width - self.props.radius * 2.0 - self.props.numTabsWidth * self.props.tabWidth) / (self.props.numTabsWidth + 1))
-        self.props.gapV = float(
-            (self.props.depth - self.props.radius * 2.0 - self.props.numTabsDepth * self.props.tabWidth) / (self.props.numTabsDepth + 1))
+        self.props = get_calculated_properties(self.props)
 
         Hinge.radius = self.props.radius
         Hinge.thickness = self.props.thickness
@@ -141,13 +119,13 @@ class HingeBox:
         Hinge.segment_width = self.props.segmentWidth
 
         self.props.adjust = (Hinge.radius * 2 - Hinge.arc_length()) + Hinge.length()
+        # self.props.sideGap -= self.props.adjust / 2
 
     def build_long_side(self):
         props = self.props
 
         width = float(props.width - props.adjust)
         depth = float(props.depth - props.adjust)
-        props.sideGap = calc_gap(width, props.numTabsWidth, props.tabWidth)
 
         def draw_lines(top_start, bottom_start, length):
             add_line(top_start, length, self._side)
@@ -161,7 +139,7 @@ class HingeBox:
             draw_lines(top_start, bottom_start, length)
 
             if self.props.box_type != BoxType.TABS:
-                self._side.extend(draw_slots(num_tabs, self.props.gapH, top_start + vector(self.props.gapH, -self.props.bottomThickness), self.props))
+                self._side.extend(draw_slots(num_tabs, props.gapH, top_start + vector(props.sideGap, -props.bottomThickness), props))
 
             new_hinge = Hinge(self.outer_height, bottom_start + length)
             new_hinge.draw()
@@ -184,8 +162,8 @@ class HingeBox:
         self.draw_dovetails(lower_left, upper_left)
         self.draw_dovetails(hinge_bottom + short_length / 2.0, hinge_top + short_length / 2)
 
-        if self.props.box_type != BoxType.TABS:
-            self._side.extend(draw_slots(1, self.props.gapH, hinge_top + vector(self.props.gapH, -self.props.bottomThickness), self.props))
+        if props.box_type != BoxType.TABS:
+            self._side.extend(draw_slots(1, props.gapH, hinge_top + vector(props.sideGap, -props.bottomThickness), props))
 
     def build_bottom(self):
         props = self.props

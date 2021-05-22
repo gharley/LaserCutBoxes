@@ -7,17 +7,6 @@ __Comment__ = "This module creates a sketch of a laser cut box which can then be
 
 from common import *
 
-# Indexes for geoid
-START = 1
-END = 2
-ORIGIN = -1
-
-# Indexes for box sides
-TOP = 0
-RIGHT = 1
-BOTTOM = 2
-LEFT = 3
-
 
 class BasicBox:
     def __init__(self, props):
@@ -65,31 +54,7 @@ class BasicBox:
         return self.props.width + self.props.thickness
 
     def _init_properties(self):
-        if self.props.depth == 0:
-            self.props.depth = self.props.width
-
-        if self.props.bottomThickness == 0:
-            self.props.bottomThickness = self.props.thickness
-
-        if self.props.lidThickness == 0:
-            self.props.lidThickness = self.props.thickness
-
-        if self.props.numTabsDepth == 0:
-            self.props.numTabsDepth = self.props.numTabsWidth
-
-        if self.props.edgeTabWidth == 0:
-            self.props.edgeTabWidth = self.props.tabWidth
-
-        self.props.sideGap = calc_gap(self.props.width, self.props.numTabsWidth, self.props.tabWidth)
-        self.props.endGap = calc_gap(self.props.depth, self.props.numTabsDepth, self.props.tabWidth)
-        self.props.heightGap = calc_gap(self.props.height, self.props.numTabsHeight, self.props.edgeTabWidth)
-
-        if self.props.box_type == BoxType.All:
-            self.props.outerHeight = self.props.height + self.props.lidThickness + self.props.bottomThickness * 2
-        elif self.props.box_type == BoxType.SLOTS:
-            self.props.outerHeight = self.props.height + self.props.lidThickness + self.props.bottomThickness
-        else:
-            self.props.outerHeight = self.props.height + self.props.bottomThickness
+        self.props = get_calculated_properties(self.props)
 
     def _build_side(self, face, tab_func):
         if face is Face.SIDE:
@@ -105,7 +70,7 @@ class BasicBox:
 
         side = self._side if face is Face.SIDE else self._end
 
-        side.append((upper_left, upper_right))
+        side.append(Line(upper_left, upper_right))
         side.extend(draw_edge_tabs(face, Direction.EAST, True, outer_height, upper_right, self.props))
 
         if self.props.box_type != BoxType.SLOTS:

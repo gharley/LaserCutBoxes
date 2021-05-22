@@ -1,6 +1,8 @@
 from enum import Enum
 import numpy as np
 
+from graphics import Line
+
 
 # DotDict - easy dictionary access
 class DotDict(dict):
@@ -43,7 +45,7 @@ def add_line(start_point, end_offset, lines=None):
     if abs(end_point[START]) < 0.0001: end_point[START] = 0.0
     if abs(end_point[END]) < 0.0001: end_point[END] = 0.0
 
-    new_line = (start_point, end_point)
+    new_line = Line(start_point, end_point)
 
     if lines is not None:
         lines.append(new_line)
@@ -122,13 +124,13 @@ def draw_edge_tabs(face, direction, is_inset, length, start, props):
         if idx == 0:
             _, line = add_line(start, first_offset, lines)
         else:
-            _, line = add_line(line[1], gap_length, lines)
+            _, line = add_line(line.end, gap_length, lines)
 
-        _, line = add_line(line[END], thickness_length, lines)
-        _, line = add_line(line[END], tab_length, lines)
-        _, line = add_line(line[END], -thickness_length, lines)
+        _, line = add_line(line.end, thickness_length, lines)
+        _, line = add_line(line.end, tab_length, lines)
+        _, line = add_line(line.end, -thickness_length, lines)
 
-    add_line(line[END], last_offset, lines)
+    add_line(line.end, last_offset, lines)
 
     return lines
 
@@ -136,10 +138,10 @@ def draw_edge_tabs(face, direction, is_inset, length, start, props):
 def draw_slot(width, height, offset):
     lower_left, upper_left, lower_right, upper_right = get_vectors(width, height)
 
-    top = (upper_left + offset, upper_right + offset)
-    right = (upper_right + offset, lower_right + offset)
-    bottom = (lower_right + offset, lower_left + offset)
-    left = (lower_left + offset, upper_left + offset)
+    top = Line(upper_left + offset, upper_right + offset)
+    right = Line(upper_right + offset, lower_right + offset)
+    bottom = Line(lower_right + offset, lower_left + offset)
+    left = Line(lower_left + offset, upper_left + offset)
 
     return [top, right, bottom, left]
 
@@ -154,6 +156,41 @@ def draw_slots(num_tabs, gap, start, props):
         tabs.extend(tab)
 
     return tabs
+
+
+def get_calculated_properties(props):
+    if props.depth == 0:
+        props.depth = props.width
+
+    if props.bottomThickness == 0:
+        props.bottomThickness = props.thickness
+
+    if props.lidThickness == 0:
+        props.lidThickness = props.thickness
+
+    if props.numTabsDepth == 0:
+        props.numTabsDepth = props.numTabsWidth
+
+    if props.edgeTabWidth == 0:
+        props.edgeTabWidth = props.tabWidth
+
+    props.sideGap = calc_gap(props.width, props.numTabsWidth, props.tabWidth)
+    props.endGap = calc_gap(props.depth, props.numTabsDepth, props.tabWidth)
+    props.heightGap = calc_gap(props.height, props.numTabsHeight, props.edgeTabWidth)
+
+    if props.box_type == BoxType.All:
+        props.outerHeight = props.height + props.lidThickness + props.bottomThickness * 2
+    elif props.box_type == BoxType.SLOTS:
+        props.outerHeight = props.height + props.lidThickness + props.bottomThickness
+    else:
+        props.outerHeight = props.height + props.bottomThickness
+
+    props.gapH = float(
+        (props.width - props.radius * 2.0 - props.numTabsWidth * props.tabWidth) / (props.numTabsWidth + 1))
+    props.gapV = float(
+        (props.depth - props.radius * 2.0 - props.numTabsDepth * props.tabWidth) / (props.numTabsDepth + 1))
+
+    return props
 
 
 def get_vectors(width, height):
