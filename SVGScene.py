@@ -27,7 +27,9 @@ class SVGScene(QGraphicsScene):
             if isinstance(line, Line):
                 self.addLine(line.start[0], line.start[1], line.end[0], line.end[1], pen)
             elif isinstance(line, Arc):
-                self.addItem(Arc.arc_to_qt(line))
+                item = Arc.arc_to_qt(line)
+                item.setPen(pen)
+                self.addItem(item)
 
         self.scale()
 

@@ -697,7 +697,7 @@ QToolTip{
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of tabs to place on the depth (short side) of the box. If set to 0, uses &lt;span style=&quot; font-style:italic;&quot;&gt;side tabs&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
-             <string>3</string>
+             <string>2</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -713,7 +713,7 @@ QToolTip{
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of tabs to place on the width (long side) of the box.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
-             <string>6</string>
+             <string>4</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
