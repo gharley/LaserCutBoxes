@@ -1,7 +1,7 @@
 from lxml import etree as et
 import numpy as np
 
-from graphics import Line
+from graphics import Line, Arc
 
 
 class SVGCreator:
@@ -32,6 +32,7 @@ class SVGCreator:
         et.SubElement(g, 'metadata', {'id': 'Laser cut box by Greg Harley'})
         paths = []
         path_data = []
+        arc_mask = 'A {0} {1} 0 0 {2} {3} {4} '
         line_mask = 'L {0} {1} '
         move_mask = 'M {0} {1} '
 
@@ -46,7 +47,13 @@ class SVGCreator:
             if len(path_data) == 0:
                 path_data.append(move_mask.format(line.start[0], line.start[1]))
 
-            path_data.append(line_mask.format(line.end[0], line.end[1]))
+            if isinstance(line, Line):
+                path_data.append(line_mask.format(line.end[0], line.end[1]))
+            elif isinstance(line, Arc):
+                if line.start[0] < line.end[0]:
+                    path_data.append(arc_mask.format(line.radius, line.radius, 0, line.end[0], line.end[1]))
+                else:
+                    path_data.append(arc_mask.format(line.radius, line.radius, 1, line.end[0], line.end[1]))
 
         if len(path_data) > 0:
             paths.append(''.join(path_data))
