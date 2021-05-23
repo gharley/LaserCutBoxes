@@ -659,7 +659,7 @@ QToolTip{
                <string>Box Bottom</string>
               </property>
               <property name="checked">
-               <bool>false</bool>
+               <bool>true</bool>
               </property>
              </widget>
             </item>

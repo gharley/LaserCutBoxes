@@ -34,16 +34,11 @@ class Face(Enum):
     BOTTOM = 3
 
 
-# Line indices
-START = 0
-END = 1
-
-
 # Helper methods
 def add_line(start_point, end_offset, lines=None):
     end_point = start_point + end_offset
-    if abs(end_point[START]) < 0.0001: end_point[START] = 0.0
-    if abs(end_point[END]) < 0.0001: end_point[END] = 0.0
+    if abs(end_point[0]) < 0.0001: end_point[0] = 0.0
+    if abs(end_point[1]) < 0.0001: end_point[1] = 0.0
 
     new_line = Line(start_point, end_point)
 

@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 from PyQt5.QtCore import QObject, QEvent, QRectF
 from PyQt5.QtGui import QPen, QColor, QTransform
 
-from graphics import Line
+from graphics import Line, Arc
 
 _PADDING = 5
 
@@ -26,6 +26,8 @@ class SVGScene(QGraphicsScene):
         for line in lines:
             if isinstance(line, Line):
                 self.addLine(line.start[0], line.start[1], line.end[0], line.end[1], pen)
+            elif isinstance(line, Arc):
+                self.addItem(Arc.arc_to_qt(line))
 
         self.scale()
 

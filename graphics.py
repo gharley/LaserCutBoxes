@@ -1,6 +1,5 @@
-from PyQt5.QtWidgets import QGraphicsItem, QGraphicsEllipseItem
-
-from common import *
+from PyQt5.QtWidgets import QGraphicsEllipseItem
+import numpy as np
 
 
 class GraphicsItem:
@@ -21,11 +20,6 @@ class GraphicsItem:
     def type(self):
         return self._type
 
-    @staticmethod
-    def arc_to_qt(arc):
-        ellipse = QGraphicsEllipseItem(arc.start, 0, 0, 0)
-        pass
-
 
 class Line(GraphicsItem):
     def __init__(self, start, end):
@@ -34,9 +28,30 @@ class Line(GraphicsItem):
 
 
 class Arc(GraphicsItem):
-    def __init__(self, start, end, radius, start_angle, end_angle):
+    def __init__(self, start, end, radius):
         super(Arc, self).__init__(start, end)
         self._type = 'ARC'
         self.radius = radius
-        self.start_angle = start_angle
-        self.end_angle = end_angle
+
+    @staticmethod
+    def arc_to_qt(arc):
+        if arc.start[0] < arc.end[0]:
+            if arc.start[1] < arc.end[1]:
+                upper_left = arc.start - np.array([0, arc.radius])
+                start_angle = 180 * 16
+            else:
+                upper_left = arc.end - np.array([arc.radius * 2, arc.radius])
+                start_angle = 270 * 16
+        else:
+            if arc.start[1] < arc.end[1]:
+                upper_left = arc.start - np.array([arc.radius * 2, -arc.radius])
+                start_angle = 0
+            else:
+                upper_left = arc.start - np.array([arc.radius, 0])
+                start_angle = 90 * 16
+
+        ellipse = QGraphicsEllipseItem(upper_left[0], upper_left[1], arc.radius * 2, arc.radius * 2)
+        ellipse.setStartAngle(start_angle)
+        ellipse.setSpanAngle(90 * 16)
+
+        return ellipse

@@ -185,30 +185,14 @@ class HingeBox:
         self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.WEST, False, depth, lower_left + offset_v, props, 2))
 
         self._bottom.append(Arc(upper_left - offset_v, upper_left + offset_h, radius))
-        # arc_stop = sketch.Geometry[box[LEFT][0]].StartPoint.y
-        # arc_start = sketch.Geometry[box[BOTTOM][0]].StartPoint.x
-        # circle = Part.Circle(vector(arc_start, arc_stop), vector(0, 0, 1), radius)
-        # bl = sketch.addGeometry(Part.ArcOfCircle(circle, pi, pi * 1.5), False)
-        #
-        # arc_start = sketch.Geometry[box[TOP][0]].StartPoint.x
-        # arc_stop = sketch.Geometry[box[LEFT][-1]].EndPoint.y
-        # circle = Part.Circle(vector(arc_start, arc_stop), vector(0, 0, 1), radius)
-        # tl = sketch.addGeometry(Part.ArcOfCircle(circle, pi / 2.0, pi), False)
-        #
-        # arc_start = sketch.Geometry[box[TOP][-1]].EndPoint.x
-        # arc_stop = sketch.Geometry[box[RIGHT][-1]].EndPoint.y
-        # circle = Part.Circle(vector(arc_start, arc_stop), vector(0, 0, 1), radius)
-        # tr = sketch.addGeometry(Part.ArcOfCircle(circle, 0, pi / 2.0), False)
-        #
-        # arc_start = sketch.Geometry[box[BOTTOM][-1]].EndPoint.x
-        # arc_stop = sketch.Geometry[box[RIGHT][0]].StartPoint.y
-        # circle = Part.Circle(vector(arc_start, arc_stop), vector(0, 0, 1), radius)
-        # br = sketch.addGeometry(Part.ArcOfCircle(circle, pi * 1.5, 0), False)
+        self._bottom.append(Arc(upper_right - offset_h, upper_right - offset_v, radius))
+        self._bottom.append(Arc(lower_right - offset_v, lower_right - offset_h, radius))
+        self._bottom.append(Arc(lower_left + offset_h, lower_left - offset_v, radius))
 
     def draw_dovetails(self, start_point, end_point):
         num_tabs = self.props.numTabsHeight
         tab_width = self.props.tabWidth
-        height = end_point[END] - start_point[END]
+        height = end_point[1] - start_point[1]
         gap = (height - num_tabs * tab_width) / (num_tabs + 1)
         gap_length = vector(0, gap)
 
