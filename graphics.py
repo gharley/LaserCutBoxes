@@ -34,7 +34,25 @@ class Arc(GraphicsItem):
         super(Arc, self).__init__(start, end)
         self._type = 'ARC'
         self.radius = radius
-        self.start_angle = 0
+
+        if self.start[0] < self.end[0]:
+            if self.start[1] < self.end[1]:
+                self.upper_left = self.start - np.array([0, self.radius])
+                self.control_point = self.end - np.array([self.radius, 0])
+                self.start_angle = 180 * 16
+            else:
+                self.upper_left = self.end - np.array([self.radius * 2, self.radius])
+                self.control_point = self.start + np.array([self.radius, 0])
+                self.start_angle = 270 * 16
+        else:
+            if self.start[1] < self.end[1]:
+                self.upper_left = self.start - np.array([self.radius * 2, -self.radius])
+                self.control_point = self.end + np.array([self.radius, 0])
+                self.start_angle = 0
+            else:
+                self.upper_left = self.start - np.array([self.radius, 0])
+                self.control_point = self.start - np.array([0, self.radius])
+                self.start_angle = 90 * 16
 
     class ArcItem(QGraphicsEllipseItem):
         def __init__(self, x, y, width, height, parent=None):
@@ -48,22 +66,7 @@ class Arc(GraphicsItem):
 
     @staticmethod
     def arc_to_qt(arc):
-        if arc.start[0] < arc.end[0]:
-            if arc.start[1] < arc.end[1]:
-                upper_left = arc.start - np.array([0, arc.radius])
-                arc.start_angle = 180 * 16
-            else:
-                upper_left = arc.end - np.array([arc.radius * 2, arc.radius])
-                arc.start_angle = 270 * 16
-        else:
-            if arc.start[1] < arc.end[1]:
-                upper_left = arc.start - np.array([arc.radius * 2, -arc.radius])
-                arc.start_angle = 0
-            else:
-                upper_left = arc.start - np.array([arc.radius, 0])
-                arc.start_angle = 90 * 16
-
-        item = Arc.ArcItem(upper_left[0], upper_left[1], arc.radius * 2, arc.radius * 2)
+        item = Arc.ArcItem(arc.upper_left[0], arc.upper_left[1], arc.radius * 2, arc.radius * 2)
         item.setStartAngle(arc.start_angle)
 
         return item
