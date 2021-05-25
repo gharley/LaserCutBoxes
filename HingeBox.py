@@ -182,9 +182,9 @@ class HingeBox:
         self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.NORTH, False, width, upper_left + offset_h, props))
         self._bottom.append(Arc(upper_right - offset_h, upper_right - offset_v, radius))
         self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.EAST, False, depth, upper_right - offset_v, props))
-        self._bottom.append(Arc(lower_right - offset_v, lower_right - offset_h, radius))
+        self._bottom.append(Arc(lower_right + offset_v, lower_right - offset_h, radius))
         self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.SOUTH, False, width, lower_right - offset_h, props))
-        self._bottom.append(Arc(lower_left + offset_h, lower_left - offset_v, radius))
+        self._bottom.append(Arc(lower_left + offset_h, lower_left + offset_v, radius))
         self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.WEST, False, depth, lower_left + offset_v, props, 2))
         self._bottom.append(Arc(upper_left - offset_v, upper_left + offset_h, radius))
 
