@@ -34,28 +34,31 @@ class Arc(GraphicsItem):
         super(Arc, self).__init__(start, end)
         self._type = 'ARC'
         self.radius = radius
-        self.control_point = np.array([self.end[0], self.start[1]])
 
         if self.start[0] < self.end[0]:
             if self.start[1] < self.end[1]:
                 self.upper_left = self.start - np.array([0, self.radius])
-                self.control_point = np.array([self.start[0], self.end[1]])
+                self.length = self.end - self.start
+                self.control_point = np.array([0, self.radius])
                 self.start_angle = 180 * 16
                 self.color = QColor(0xff0000)
             else:
                 self.upper_left = self.end - np.array([self.radius * 2, self.radius])
-                self.control_point = np.array([self.end[0], self.start[1]])
+                self.length = self.end - self.start
+                self.control_point = np.array([self.radius, 0])
                 self.start_angle = 270 * 16
                 self.color = QColor(0x00ff00)
         else:
             if self.start[1] < self.end[1]:
                 self.upper_left = self.start - np.array([self.radius * 2, -self.radius])
-                self.control_point = np.array([self.start[0], self.end[1]])
+                self.length = np.array([self.radius, -self.radius])
+                self.control_point = np.array([0, -self.radius])
                 self.start_angle = 0
                 self.color = QColor(0x0000ff)
             else:
                 self.upper_left = self.start - np.array([self.radius, 0])
-                # self.control_point = self.end + np.array([self.radius, 0])
+                self.length = np.array([-self.radius, self.radius])
+                self.control_point = np.array([-self.radius, 0])
                 self.start_angle = 90 * 16
                 self.color = QColor(0)
 

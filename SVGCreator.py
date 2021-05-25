@@ -32,7 +32,7 @@ class SVGCreator:
         et.SubElement(g, 'metadata', {'id': 'Laser cut box by Greg Harley'})
         paths = []
         path_data = []
-        arc_mask = 'Q {0} {1} {2} {3} '
+        arc_mask = 'q {0} {1} {2} {3} '
         line_mask = 'L {0} {1} '
         move_mask = 'M {0} {1} '
 
@@ -50,7 +50,7 @@ class SVGCreator:
             if isinstance(line, Line):
                 path_data.append(line_mask.format(line.end[0], line.end[1]))
             elif isinstance(line, Arc):
-                path_data.append(arc_mask.format(line.control_point[0], line.control_point[1], line.end[0], line.end[1]))
+                path_data.append(arc_mask.format(line.control_point[0], line.control_point[1], line.length[0], line.length[1]))
 
         if len(path_data) > 0:
             paths.append(''.join(path_data))
