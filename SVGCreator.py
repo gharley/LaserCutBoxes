@@ -44,7 +44,7 @@ class SVGCreator:
                     paths.append(''.join(path_data))
                     path_data = []
 
-            if len(path_data) == 0 or isinstance(line, Arc):
+            if len(path_data) == 0:
                 path_data.append(move_mask.format(line.start[0], line.start[1]))
 
             if isinstance(line, Line):

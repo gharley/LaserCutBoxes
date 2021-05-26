@@ -34,6 +34,18 @@ class BasicBox:
         return self.props.depth
 
     @property
+    def display_depth(self):
+        return self.outer_depth
+
+    @property
+    def display_height(self):
+        return self.outer_height
+
+    @property
+    def display_width(self):
+        return self.outer_width
+
+    @property
     def outer_depth(self):
         return self.props.depth + self.props.thickness
 
@@ -98,11 +110,11 @@ class BasicBox:
         self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.EAST, False, depth, upper_right, self.props))
         self._bottom.extend(draw_edge_tabs(Face.BOTTOM, Direction.SOUTH, False, width, lower_right, self.props))
 
-    def build_long_side(self):
+    def build_side(self):
         self._side = []
         self._build_side(Face.SIDE, self.draw_side_slots)
 
-    def build_short_side(self):
+    def build_end(self):
         self._end = []
         self._build_side(Face.END, self.draw_end_slots)
 

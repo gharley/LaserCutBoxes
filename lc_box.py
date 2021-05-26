@@ -57,6 +57,9 @@ class Main(QMainWindow):
                 self.imgEnd.show()
                 self.chkEnd.show()
 
+            if self.isVisible():
+                self._build_geometry()
+
         self.cboBoxType.currentIndexChanged.connect(self._set_box_type)
         self.btnGenerate.clicked.connect(self._build_geometry)
         self.btnBasic.clicked.connect(toggle_type)
@@ -131,19 +134,19 @@ class Main(QMainWindow):
         self.scnBottom.clear()
 
         if self.chkSide.isChecked():
-            box.build_long_side()
+            box.build_side()
             if isinstance(box, HingeBox):
-                self.scnSide.add_lines(box.outer_width * 4, box.outer_height, box.side)
+                self.scnSide.add_lines(box.display_width_hinge, box.display_height, box.side)
             else:
-                self.scnSide.add_lines(box.outer_width, box.outer_height, box.side)
+                self.scnSide.add_lines(box.display_width, box.display_height, box.side)
 
         if not is_hinge and self.chkEnd.isChecked():
-            box.build_short_side()
-            self.scnEnd.add_lines(box.depth, box.outer_height, box.end)
+            box.build_end()
+            self.scnEnd.add_lines(box.display_depth, box.display_height, box.end)
 
         if self.chkBottom.isChecked():
             box.build_bottom()
-            self.scnBottom.add_lines(box.outer_width, box.outer_depth, box.bottom)
+            self.scnBottom.add_lines(box.display_width, box.display_depth, box.bottom)
 
     def _load_specs(self):
         dialog = QFileDialog()
@@ -159,7 +162,7 @@ class Main(QMainWindow):
                 widget = self.findChild(QWidget, key)
                 if widget is None: continue
 
-                if key.startswith('chk'):
+                if key.startswith('chk') or key.startswith('btn'):
                     widget.setChecked(value)
                 elif key.startswith('cbo'):
                     widget.setCurrentIndex(value)

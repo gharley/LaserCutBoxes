@@ -92,6 +92,22 @@ class HingeBox:
         return self._bottom
 
     @property
+    def display_depth(self):
+        return self.outer_depth
+
+    @property
+    def display_height(self):
+        return self.outer_height
+
+    @property
+    def display_width(self):
+        return self.outer_width
+
+    @property
+    def display_width_hinge(self):
+        return self.outer_width * 2 + self.outer_depth * 2 - Hinge.length() * 4
+
+    @property
     def side(self):
         return self._side
 
@@ -120,7 +136,7 @@ class HingeBox:
         self.props.sideGap = calc_gap(self.props.width - self.props.adjust, self.props.numTabsWidth, self.props.tabWidth)
         self.props.endGap = calc_gap(self.props.depth - self.props.adjust, self.props.numTabsDepth, self.props.tabWidth)
 
-    def build_long_side(self):
+    def build_side(self):
         props = self.props
 
         # width = float(props.width - Hinge.length())
