@@ -114,14 +114,11 @@ def draw_edge_tabs(face, direction, is_inset, length, start, props, num_tabs=Non
         thickness_length = vector(0, config.thickness)
 
     lines = []
-    line = Line(0, 0)
+    _, line = add_line(start, first_offset, lines)
 
     for idx in range(0, int(config.numTabs)):
-        if idx == 0:
-            _, line = add_line(start, first_offset, lines)
-        else:
+        if idx > 0:
             _, line = add_line(line.end, gap_length, lines)
-
         _, line = add_line(line.end, thickness_length, lines)
         _, line = add_line(line.end, tab_length, lines)
         _, line = add_line(line.end, -thickness_length, lines)

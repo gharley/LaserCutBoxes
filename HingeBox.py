@@ -105,7 +105,7 @@ class HingeBox:
 
     @property
     def display_width_hinge(self):
-        return self.outer_width * 2 + self.outer_depth * 2 - Hinge.length() * 4
+        return self.outer_width * 2 + self.outer_depth * 2 - Hinge.length() * 2
 
     @property
     def side(self):
@@ -144,16 +144,16 @@ class HingeBox:
         width = float(props.width - props.adjust)
         depth = float(props.depth - props.adjust)
 
-        def draw_lines(top_start, bottom_start, length, num_tabs):
+        def draw_lines(top_start, bottom_start, length, num_tabs, face=Face.SIDE):
             add_line(top_start, length, self._side)
 
             if self.props.box_type == BoxType.SLOTS:
                 add_line(bottom_start, length, self._side)
             else:
-                self._side.extend(draw_edge_tabs(Face.SIDE, Direction.SOUTH, True, length[0], bottom_start + length, props, num_tabs, False))
+                self._side.extend(draw_edge_tabs(face, Direction.SOUTH, True, length[0], bottom_start + length, props, num_tabs, False))
 
-        def draw_side(top_start, bottom_start, length, num_tabs=1):
-            draw_lines(top_start, bottom_start, length, num_tabs)
+        def draw_side(top_start, bottom_start, length, face=Face.SIDE, num_tabs=1):
+            draw_lines(top_start, bottom_start, length, num_tabs, face)
 
             if self.props.box_type != BoxType.TABS:
                 self._side.extend(draw_slots(num_tabs, props.gapH, top_start + vector(props.sideGap, -props.bottomThickness), props))
@@ -169,12 +169,12 @@ class HingeBox:
         short_length = vector(depth, 0)
         long_length = vector(width, 0)
 
-        hinge_top, hinge_bottom = draw_side(upper_left, lower_left, short_length / 2.0)
-        hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, long_length, props.numTabsWidth)
-        hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, short_length, props.numTabsDepth)
-        hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, long_length, props.numTabsWidth)
+        hinge_top, hinge_bottom = draw_side(upper_left, lower_left, short_length / 2.0, Face.END)
+        hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, long_length, Face.SIDE, props.numTabsWidth)
+        hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, short_length, Face.END, props.numTabsDepth)
+        hinge_top, hinge_bottom = draw_side(hinge_top, hinge_bottom, long_length, Face.SIDE, props.numTabsWidth)
 
-        draw_lines(hinge_top, hinge_bottom, short_length / 2.0, 1)
+        draw_lines(hinge_top, hinge_bottom, short_length / 2.0, 1, Face.END)
 
         self.draw_dovetails(lower_left, upper_left)
         self.draw_dovetails(hinge_bottom + short_length / 2.0, hinge_top + short_length / 2)
